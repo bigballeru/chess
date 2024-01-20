@@ -67,13 +67,14 @@ public class ChessPiece {
                 BishopMovesCalculator bishopMoves = new BishopMovesCalculator();
                 yield bishopMoves.pieceMoves(board, myPosition);
             case KNIGHT:
-                KnightMovesCalculator knighMoves = new KnightMovesCalculator();
-                yield knighMoves.pieceMoves(board, myPosition);
+                KnightMovesCalculator knightMoves = new KnightMovesCalculator();
+                yield knightMoves.pieceMoves(board, myPosition);
             case ROOK:
                 RookMovesCalculator rookMoves = new RookMovesCalculator();
                 yield rookMoves.pieceMoves(board, myPosition);
             case PAWN:
-                yield null;
+                PawnMovesCalculator pawnMoves = new PawnMovesCalculator();
+                yield pawnMoves.pieceMoves(board, myPosition);
         };
     }
 
