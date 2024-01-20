@@ -16,49 +16,65 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         int myCol = position.getColumn();
         ChessGame.TeamColor myColor = myPiece.getTeamColor();
 
+        // Black first move
         if ((myColor == ChessGame.TeamColor.BLACK) && (myRow == 7)) {
             int[][] possibleMoves = {{-1,0}, {-2,0}};
 
-            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.BLACK);
-            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false);
+            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.BLACK, false);
+            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, false);
         }
+        // White first move
         else if ((myColor == ChessGame.TeamColor.WHITE) && (myRow == 2)) {
             int[][] possibleMoves = {{1,0}, {2,0}};
 
-            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.WHITE);
-            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false);
+            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.WHITE, false);
+            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, false);
         }
+        // Black any other move
         else if ((myColor == ChessGame.TeamColor.BLACK)) {
             int[][] possibleMoves = {{-1,0}};
 
-            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.BLACK);
-            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false);
+            if (myRow == 2) {
+                checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.BLACK, true);
+                initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, true);
+            }
+            else {
+                checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.BLACK, false);
+                initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, false);
+            }
         }
+        // White any other move
         else if ((myColor == ChessGame.TeamColor.WHITE)) {
             int[][] possibleMoves = {{1,0}};
 
-            checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.WHITE);
-            initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false);
+            if (myRow == 7) {
+                checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.WHITE, true);
+                initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, true);
+            }
+            else {
+                checkKill(board, position, moves, myRow, myCol, ChessGame.TeamColor.WHITE, false);
+                initialPawnHelper(board, position, moves, myRow, myCol, possibleMoves, false, false);
+            }
         }
         return moves;
     }
 
-    private void checkKill(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor) {
+    private void checkKill(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor, boolean promo) {
         if (myColor == ChessGame.TeamColor.BLACK) {
             int[][] possKillMoves = {{-1, -1}};
-            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true);
+            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true, promo);
             possKillMoves[0] = new int[]{-1, 1};
-            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true);
+            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true, promo);
         }
         else {
             int[][] possKillMoves = {{1,-1}};
-            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true);
+            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true, promo);
             possKillMoves[0] = new int[]{1, 1};
-            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true);
+            initialPawnHelper(board, position, moves, myRow, myCol, possKillMoves, true, promo);
         }
     }
 
-    private void initialPawnHelper(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, int[][] possibleMoves, boolean promo) {
+    private void initialPawnHelper(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, int[][] possibleMoves, boolean attack, boolean promo) {
         for (int[] m : possibleMoves) {
             int newRow = myRow;
             int newCol = myCol;
@@ -70,20 +86,36 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
                 ChessPosition myOldPosition = new ChessPosition(myRow, myCol);
                 ChessPosition myNewPosition = new ChessPosition(newRow, newCol);
 
-                if (!promo && (board.getPiece(myNewPosition) == null)) {
-                    ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                    moves.add(myMove);
+                if (!attack && (board.getPiece(myNewPosition) == null)) {
+                    if (promo) {
+                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.QUEEN));
+                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.BISHOP));
+                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.ROOK));
+                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.KNIGHT));
+                    }
+                    else {
+                        ChessMove myMove = new ChessMove(position, myNewPosition, null);
+                        moves.add(myMove);
+                    }
                 }
-                else if (promo && (board.getPiece(myNewPosition) == null)) {
+                else if (attack && (board.getPiece(myNewPosition) == null)) {
                     return;
                 }
-                else if (!promo && (board.getPiece(myNewPosition) != null)) {
+                else if (!attack && (board.getPiece(myNewPosition) != null)) {
                     return;
                 }
                 else {
                     if (board.getPiece(myOldPosition).getTeamColor() != board.getPiece(myNewPosition).getTeamColor()) {
-                        ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                        moves.add(myMove);
+                        if (promo) {
+                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.QUEEN));
+                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.BISHOP));
+                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.ROOK));
+                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.KNIGHT));
+                        }
+                        else {
+                            ChessMove myMove = new ChessMove(position, myNewPosition, null);
+                            moves.add(myMove);
+                        }
                     }
                     else {
                         return;
