@@ -41,6 +41,17 @@ public class ChessPiece {
         return pieceColor;
     }
 
+    public char getTypeAndColor() {
+        char toReturn = type.toString().charAt(0);
+
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            return toReturn;
+        }
+        else {
+            return Character.toLowerCase(toReturn);
+        }
+    }
+
     /**
      * @return which type of chess piece this piece is
      */

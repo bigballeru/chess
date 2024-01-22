@@ -127,4 +127,23 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(squares);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int row = 8; row >= 1; row--) { // Assuming rows are 1-indexed and row 8 is the top of the board
+            builder.append("|");
+            for (int col = 1; col <= 8; col++) { // Assuming columns are 1-indexed
+                ChessPiece piece = squares[row][col];
+                if (piece == null) {
+                    builder.append(" |");
+                } else {
+                    builder.append(piece.getTypeAndColor()).append("|"); // Assuming getSymbol() returns a single-character string representing the piece
+                }
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+
 }
