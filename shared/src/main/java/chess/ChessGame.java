@@ -1,7 +1,5 @@
 package chess;
 
-import java.awt.*;
-import java.security.KeyStore;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -155,7 +153,7 @@ public class ChessGame {
         return falsePosition;
     }
 
-    public Collection<ChessMove> findAllAttacks(TeamColor teamColor) {
+    public Collection<ChessMove> findAllPossibleMoves(TeamColor teamColor) {
         TeamColor attackColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         var allPossibleMoves = new HashSet<ChessMove>();
 
@@ -187,7 +185,7 @@ public class ChessGame {
             return false;
         }
 
-        Collection<ChessMove> allAttacks = findAllAttacks(teamColor);
+        Collection<ChessMove> allAttacks = findAllPossibleMoves(teamColor);
 
         for (ChessMove move : allAttacks) {
             if ((move.getEndPosition().getRow() == kingPosition.getRow())
@@ -206,7 +204,28 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Can't be in checkmate if you are in stalemate
+        if (isInStalemate(teamColor)) {
+            return false;
+        }
+
+        // Can't be in checkmate if you are not in check
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        TeamColor colorToCheck = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        Collection<ChessMove> allMoves = findAllPossibleMoves(colorToCheck);
+        Collection<ChessMove> realPossibleMoves = new HashSet<ChessMove>();
+
+        for (ChessMove move : allMoves) {
+            if (!doesMoveResultInCheck(move)) {
+                return false;
+            }
+        }
+
+        return true;
+
     }
 
     /**
@@ -226,7 +245,7 @@ public class ChessGame {
 
         // (2) No legal moves are possible
         TeamColor colorToCheck = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-        Collection<ChessMove> allMoves = findAllAttacks(colorToCheck);
+        Collection<ChessMove> allMoves = findAllPossibleMoves(colorToCheck);
         Collection<ChessMove> realPossibleMoves = new HashSet<ChessMove>();
 
         for (ChessMove move : allMoves) {
