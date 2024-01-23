@@ -63,17 +63,17 @@ public class ChessGame {
             return null;
         }
 
-        // Collection<ChessMove> myValidMoves = myPiece.pieceMoves(myBoard, startPosition);
+        Collection<ChessMove> myValidMoves = myPiece.pieceMoves(myBoard, startPosition);
+        Collection<ChessMove> toReturnMoves = new HashSet<ChessMove>();
 
-        return myPiece.pieceMoves(myBoard, startPosition);
+        for (ChessMove move : myValidMoves) {
+            if (!doesMoveResultInCheck(move)) {
+                toReturnMoves.add(move);
+            }
+        }
+
+        return toReturnMoves;
     }
-
-    /**
-     * Makes a move in a chess game
-     *
-     * @param move chess move to preform
-     * @throws InvalidMoveException if move is invalid
-     */
 
 
     private boolean doesMoveResultInCheck(ChessMove move) {
@@ -95,22 +95,32 @@ public class ChessGame {
         return resultsInCheck;
     }
 
+    /**
+     * Makes a move in a chess game
+     *
+     * @param move chess move to preform
+     * @throws InvalidMoveException if move is invalid
+     */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> myValidMoves = this.validMoves(move.getStartPosition());
 
-        // IF IT IS A PAWN THAT IS GOING TO BE PROMOTED, I NEED TO ADD NOT myPiece, but whatever the promotion piece is
-
+        // Checks to make sure it is my move
         if (yourTurn(move)) {
+            // Checks to make sure that the move is valid
             if (myValidMoves.contains(move)) {
-                if (!doesMoveResultInCheck(move)) {
-                    ChessPiece myPiece = myBoard.getPiece(move.getStartPosition());
-                    myBoard.clearPiece(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
-                    myBoard.addPiece(move.getEndPosition(), myPiece);
-                    setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+                // Gets the piece so that we can add it to its new location after deleting its old location
+                ChessPiece myPiece = myBoard.getPiece(move.getStartPosition());
+                myBoard.clearPiece(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
+                // Checks if it is a pawn promotion
+                if (move.getPromotionPiece() != null) {
+                    ChessPiece promoPiece = new ChessPiece(myPiece.getTeamColor(), move.getPromotionPiece());
+                    myBoard.addPiece(move.getEndPosition(), promoPiece);
                 }
                 else {
-                    throw new InvalidMoveException("Results in check");
+                    myBoard.addPiece(move.getEndPosition(), myPiece);
                 }
+                // Changes the turn to the next team
+                setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
             }
             else {
                 throw new InvalidMoveException();
@@ -207,7 +217,29 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Stalemate happens if
+
+        // (1) King is not in check
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+
+        // (2) No legal moves are possible
+        TeamColor colorToCheck = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        Collection<ChessMove> allMoves = findAllAttacks(colorToCheck);
+        Collection<ChessMove> realPossibleMoves = new HashSet<ChessMove>();
+
+        for (ChessMove move : allMoves) {
+            if (!doesMoveResultInCheck(move)) {
+                realPossibleMoves.add(move);
+            }
+        }
+
+        if (realPossibleMoves.isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
