@@ -10,4 +10,6 @@ public interface AuthDAO {
     public boolean validateAuth(String myAuth);
 
     public void deleteAuth(String myAuth);
+
+    public String getUsername(String myAuth);
 }

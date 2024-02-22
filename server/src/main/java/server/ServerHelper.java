@@ -2,7 +2,7 @@ package server;
 
 import dataAccess.BadRequestException;
 import dataAccess.UnauthorizedRequestException;
-import dataAccess.UsernameTakenException;
+import dataAccess.AlreadyTakenException;
 import model.requestresults.*;
 import service.GameService;
 import spark.*;
@@ -23,7 +23,7 @@ public class ServerHelper {
             toReturn = new RegisterAndLoginResult(registerRequest.username(), code, null);
             response.body(new Gson().toJson(toReturn));
             response.status(200);
-        } catch (UsernameTakenException e) {
+        } catch (AlreadyTakenException e) {
             toReturn = new RegisterAndLoginResult(null, null, e.getMessage());
             response.body(new Gson().toJson(e.getMessage()));
             response.status(403);
@@ -137,6 +137,31 @@ public class ServerHelper {
     }
 
     public static Object joinGame(Request request, Response response) {
-        return null;
+        String authCode = request.headers("Authorization");
+        var joinGameRequest = new Gson().fromJson(request.body(), JoinGameRequest.class);
+        ListGamesResult toReturn = new ListGamesResult(null, null);
+        try {
+            userService.validateAuth(authCode);
+            String myUsername = userService.getUsername(authCode);
+            gameService.joinGame(joinGameRequest, myUsername);
+            response.status(200);
+        } catch (UnauthorizedRequestException e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(401);
+        } catch (BadRequestException e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(400);
+        } catch (AlreadyTakenException e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(403);
+        } catch (Exception e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(500);
+        }
+        return new Gson().toJson(toReturn);
     }
 }

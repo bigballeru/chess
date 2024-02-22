@@ -15,12 +15,12 @@ public class UserService {
     public void UserService() {
     }
 
-    public String registerUser(UserData userData) throws UsernameTakenException, BadRequestException {
+    public String registerUser(UserData userData) throws AlreadyTakenException, BadRequestException {
         if (userData.username() == null || userData.email() == null || userData.password() == null) {
             throw new BadRequestException();
         }
         if (userDAO.getUser(userData.username()) != null) {
-            throw new UsernameTakenException();
+            throw new AlreadyTakenException();
         }
         userDAO.addUser(userData.username(), userData.password(), userData.email());
         String myUUID = UUID.randomUUID().toString();
@@ -42,17 +42,21 @@ public class UserService {
         return myUUID;
     }
 
-    public void logoutUser(String authcode) throws UnauthorizedRequestException {
-        if (!authDAO.validateAuth(authcode)) {
+    public void logoutUser(String authCode) throws UnauthorizedRequestException {
+        if (!authDAO.validateAuth(authCode)) {
             throw new UnauthorizedRequestException();
         }
-        authDAO.deleteAuth(authcode);
+        authDAO.deleteAuth(authCode);
     }
 
-    public void validateAuth(String authcode) throws UnauthorizedRequestException {
-        if (!authDAO.validateAuth(authcode)) {
+    public void validateAuth(String authCode) throws UnauthorizedRequestException {
+        if (!authDAO.validateAuth(authCode)) {
             throw new UnauthorizedRequestException();
         }
+    }
+
+    public String getUsername(String authCode) {
+        return authDAO.getUsername(authCode);
     }
 
     public void clearAll() {

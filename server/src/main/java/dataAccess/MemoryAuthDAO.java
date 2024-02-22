@@ -40,6 +40,16 @@ public class MemoryAuthDAO implements AuthDAO {
         }
     }
 
+    @Override
+    public String getUsername(String myAuth) {
+        for (AuthData a : myAuths) {
+            if (Objects.equals(a.authToken(), myAuth)) {
+                return a.username();
+            }
+        }
+        return ""; //SHOULD NEVER RETURN THIS
+    }
+
     public void clearAll() {
         myAuths.clear();
     }

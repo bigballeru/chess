@@ -3,8 +3,10 @@ package dataAccess;
 import chess.ChessGame;
 import model.GameData;
 import model.UserData;
+import model.requestresults.JoinGameRequest;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MemoryGameDAO implements GameDAO {
 
@@ -16,14 +18,59 @@ public class MemoryGameDAO implements GameDAO {
         myGames.clear();
     }
 
+    @Override
     public int createGame(String gameName) {
-        GameData newGame = new GameData(gameCount, null, null, null, new ChessGame());
+        GameData newGame = new GameData(gameCount, null, null, gameName, new ChessGame());
         myGames.add(newGame);
         return gameCount++;
     }
 
+    @Override
+    public boolean checkGameID(Integer gameID) {
+        for (GameData game : myGames) {
+            if (game.gameID() == gameID) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException {
+        GameData gameToRemove = null;
+        GameData updatedGame = null;
+        for (GameData game : myGames) {
+            if (game.gameID() == joinGameRequest.gameID()) {
+                if (Objects.equals(joinGameRequest.playerColor(), "BLACK")) {
+                    if (game.blackUsername() == null) {
+                        gameToRemove = game;
+                        updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gamename(), game.game());
+                    }
+                    else {
+                        throw new AlreadyTakenException();
+                    }
+                }
+                if (Objects.equals(joinGameRequest.playerColor(), "WHITE")) {
+                    if (game.blackUsername() == null) {
+                        gameToRemove = game;
+                        updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gamename(), game.game());
+                    }
+                    else {
+                        throw new AlreadyTakenException();
+                    }
+                }
+                if (Objects.equals(joinGameRequest.playerColor(), null)) {
+                    return;
+                }
+            }
+        }
+        myGames.remove(gameToRemove);
+        myGames.add(updatedGame);
+        // TODO: figure out how to put in observers
+    }
+
+    @Override
     public ArrayList<GameData> listGames() {
-        System.out.println(myGames);
         return myGames;
     }
 }
