@@ -3,8 +3,7 @@ package server;
 import dataAccess.BadRequestException;
 import dataAccess.UnauthorizedRequestException;
 import dataAccess.UsernameTakenException;
-import model.requestresults.LoginRequest;
-import model.requestresults.RegisterAndLoginResult;
+import model.requestresults.*;
 import service.GameService;
 import spark.*;
 import com.google.gson.Gson;
@@ -61,7 +60,27 @@ public class ServerHelper {
     }
 
     public static Object createGame(Request request, Response response) {
-        return null;
+        var createGameRequest = new Gson().fromJson(request.body(), CreateGameRequest.class);
+        String authCode = request.headers("Authorization");
+        CreateGameResult toReturn = null;
+        try {
+            userService.validateAuth(authCode);
+            toReturn = new CreateGameResult(gameService.createGame(createGameRequest), null);
+            response.status(200);
+        } catch (UnauthorizedRequestException e) {
+            toReturn = new CreateGameResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(401);
+        } catch (BadRequestException e) {
+            toReturn = new CreateGameResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(400);
+        } catch (Exception e) {
+            toReturn = new CreateGameResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(500);
+        }
+        return new Gson().toJson(toReturn);
     }
 
     public static Object clear(Request request, Response response) {
@@ -98,7 +117,23 @@ public class ServerHelper {
     }
 
     public static Object listGames(Request request, Response response) {
-        return null;
+        String authCode = request.headers("Authorization");
+        ListGamesResult toReturn = null;
+        try {
+            userService.validateAuth(authCode);
+            toReturn = new ListGamesResult(gameService.listGames(), null);
+            response.body(new Gson().toJson(toReturn));
+            response.status(200);
+        } catch (UnauthorizedRequestException e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(401);
+        } catch (Exception e) {
+            toReturn = new ListGamesResult(null, e.getMessage());
+            response.body(new Gson().toJson(e.getMessage()));
+            response.status(500);
+        }
+        return new Gson().toJson(toReturn);
     }
 
     public static Object joinGame(Request request, Response response) {

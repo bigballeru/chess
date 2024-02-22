@@ -49,6 +49,12 @@ public class UserService {
         authDAO.deleteAuth(authcode);
     }
 
+    public void validateAuth(String authcode) throws UnauthorizedRequestException {
+        if (!authDAO.validateAuth(authcode)) {
+            throw new UnauthorizedRequestException();
+        }
+    }
+
     public void clearAll() {
         userDAO.clearAll();
         authDAO.clearAll();
