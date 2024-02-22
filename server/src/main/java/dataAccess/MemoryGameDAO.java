@@ -66,7 +66,6 @@ public class MemoryGameDAO implements GameDAO {
         }
         myGames.remove(gameToRemove);
         myGames.add(updatedGame);
-        // TODO: figure out how to put in observers
     }
 
     @Override
