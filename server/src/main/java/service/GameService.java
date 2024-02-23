@@ -40,4 +40,5 @@ public class GameService {
         }
         gameDAO.joinGame(joinGameRequest, username);
     }
+
 }
