@@ -18,6 +18,7 @@ public class UserServiceTests {
     public void registerUserPass() throws BadRequestException, AlreadyTakenException {
         UserService userService = new UserService();
         Assertions.assertNotNull(userService.registerUser(new UserData("testuser", "password", "test@gmail.com")));
+        userService.clearAll();
     }
 
     @Test
@@ -25,6 +26,7 @@ public class UserServiceTests {
     public void registerUserFail() {
         UserService userService = new UserService();
         Assertions.assertThrows(BadRequestException.class, () -> userService.registerUser(new UserData(null, "password", "test@gmail.com")));
+        userService.clearAll();
     }
 
     @Test
@@ -33,6 +35,7 @@ public class UserServiceTests {
         UserService userService = new UserService();
         userService.registerUser(new UserData("testuser", "password", "test@gmail.com"));
         Assertions.assertNotNull(userService.loginUser(new LoginRequest("testuser", "password")));
+        userService.clearAll();
     }
 
     @Test
@@ -41,6 +44,7 @@ public class UserServiceTests {
         UserService userService = new UserService();
         userService.registerUser(new UserData("username", "password", "test@gmail.com"));
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> userService.loginUser(new LoginRequest("username", "wrong")));
+        userService.clearAll();
     }
 
     @Test
@@ -49,6 +53,7 @@ public class UserServiceTests {
         UserService userService = new UserService();
         String authToken = userService.registerUser(new UserData("testuser", "password", "test@gmail.com"));
         Assertions.assertDoesNotThrow(() -> userService.logoutUser(authToken));
+        userService.clearAll();
     }
 
     @Test
@@ -56,5 +61,6 @@ public class UserServiceTests {
     public void logoutUserFail() {
         UserService userService = new UserService();
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> userService.logoutUser(null));
+        userService.clearAll();
     }
 }

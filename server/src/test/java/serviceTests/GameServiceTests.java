@@ -16,6 +16,7 @@ public class GameServiceTests {
     public void createGameTestPass() throws BadRequestException {
         GameService gameService = new GameService();
         Assertions.assertNotNull(gameService.createGame(new CreateGameRequest("testNewGame")));
+        gameService.clearAll();
     }
 
     @Test
@@ -23,6 +24,7 @@ public class GameServiceTests {
     public void createGameTestFail() {
         GameService gameService = new GameService();
         Assertions.assertThrows(BadRequestException.class, () -> gameService.createGame(new CreateGameRequest(null)));
+        gameService.clearAll();
     }
 
     @Test
@@ -33,6 +35,7 @@ public class GameServiceTests {
         gameService.createGame(new CreateGameRequest("game2"));
         gameService.createGame(new CreateGameRequest("game3"));
         Assertions.assertEquals(3, gameService.listGames().size());
+        gameService.clearAll();
     }
 
 //    @Test
@@ -47,6 +50,7 @@ public class GameServiceTests {
         GameService gameService = new GameService();
         Integer gameID = gameService.createGame(new CreateGameRequest("game1"));
         Assertions.assertDoesNotThrow(() -> gameService.joinGame(new JoinGameRequest("BLACK", gameID), "Father"));
+        gameService.clearAll();
     }
 
     @Test
@@ -54,5 +58,6 @@ public class GameServiceTests {
     public void joinGameTestFail() {
         GameService gameService = new GameService();
         Assertions.assertThrows(BadRequestException.class, () -> gameService.joinGame(new JoinGameRequest("BLACK", null), "Father"));
+        gameService.clearAll();
     }
 }
