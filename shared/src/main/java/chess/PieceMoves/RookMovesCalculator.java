@@ -2,7 +2,6 @@ package chess.PieceMoves;
 
 import chess.*;
 
-
 import java.util.Collection;
 import java.util.HashSet;
 
