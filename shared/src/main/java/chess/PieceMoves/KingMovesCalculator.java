@@ -19,34 +19,7 @@ public class KingMovesCalculator implements PieceMovesCalculator {
 
         int[][] possibleMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
 
-        for (int[] m : possibleMoves) {
-            int newRow = myRow;
-            int newCol = myCol;
+        return PieceMovesCalculator.getChessMoves(board, position, moves, myRow, myCol, myColor, possibleMoves);
 
-            newRow += m[0];
-            newCol += m[1];
-
-            while ((newRow < 9) && (newRow > 0) && (newCol < 9) && (newCol > 0)) {
-                ChessPosition myNewPosition = new ChessPosition(newRow, newCol);
-
-                if (board.getPiece(myNewPosition) != null) {
-                    if (board.getPiece(myNewPosition).getTeamColor() != myColor) {
-                        ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                        moves.add(myMove);
-                        break;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                moves.add(myMove);
-
-                break;
-            }
-        }
-
-        return moves;
     }
 }
