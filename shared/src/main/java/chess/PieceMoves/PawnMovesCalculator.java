@@ -87,16 +87,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
                 ChessPosition myNewPosition = new ChessPosition(newRow, newCol);
 
                 if (!attack && (board.getPiece(myNewPosition) == null)) {
-                    if (promo) {
-                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.QUEEN));
-                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.BISHOP));
-                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.ROOK));
-                        moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.KNIGHT));
-                    }
-                    else {
-                        ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                        moves.add(myMove);
-                    }
+                    promoteOrNot(position, moves, promo, myNewPosition);
                 }
                 else if (attack && (board.getPiece(myNewPosition) == null)) {
                     return;
@@ -106,22 +97,26 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
                 }
                 else {
                     if (board.getPiece(myOldPosition).getTeamColor() != board.getPiece(myNewPosition).getTeamColor()) {
-                        if (promo) {
-                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.QUEEN));
-                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.BISHOP));
-                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.ROOK));
-                            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.KNIGHT));
-                        }
-                        else {
-                            ChessMove myMove = new ChessMove(position, myNewPosition, null);
-                            moves.add(myMove);
-                        }
+                        promoteOrNot(position, moves, promo, myNewPosition);
                     }
                     else {
                         return;
                     }
                 }
             }
+        }
+    }
+
+    private static void promoteOrNot(ChessPosition position, HashSet<ChessMove> moves, boolean promo, ChessPosition myNewPosition) {
+        if (promo) {
+            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(position, myNewPosition, ChessPiece.PieceType.KNIGHT));
+        }
+        else {
+            ChessMove myMove = new ChessMove(position, myNewPosition, null);
+            moves.add(myMove);
         }
     }
 }

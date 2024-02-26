@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import service.GameService;
+import service.UserService;
 
 public class GameServiceTests {
 
@@ -41,7 +42,9 @@ public class GameServiceTests {
 //    @Test
 //    @DisplayName("List Games Test Fail")
 //    public void listGamesTestFail() {
-//
+//        UserService userService = new UserService();
+//        GameService gameService = new GameService();
+//        userService.
 //    }
 
     @Test
