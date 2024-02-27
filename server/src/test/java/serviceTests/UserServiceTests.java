@@ -63,4 +63,12 @@ public class UserServiceTests {
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> userService.logoutUser(null));
         userService.clearAll();
     }
+
+    @Test
+    @DisplayName("Clear User Info")
+    public void clearUserInfo() throws BadRequestException, AlreadyTakenException {
+        UserService userService = new UserService();
+        userService.registerUser(new UserData("username", "password", "test@gmail.com"));
+        Assertions.assertDoesNotThrow(() -> userService.clearAll());
+    }
 }

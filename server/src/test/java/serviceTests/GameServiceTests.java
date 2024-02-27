@@ -2,6 +2,7 @@ package serviceTests;
 
 import dataAccess.AlreadyTakenException;
 import dataAccess.BadRequestException;
+import model.UserData;
 import model.requestresults.CreateGameRequest;
 import model.requestresults.JoinGameRequest;
 import org.junit.jupiter.api.Assertions;
@@ -39,13 +40,14 @@ public class GameServiceTests {
         gameService.clearAll();
     }
 
-//    @Test
-//    @DisplayName("List Games Test Fail")
-//    public void listGamesTestFail() {
-//        UserService userService = new UserService();
-//        GameService gameService = new GameService();
-//        userService.
-//    }
+    @Test
+    @DisplayName("List Games Test Pass 1")
+    public void listGamesTestPass1() throws BadRequestException {
+        GameService gameService = new GameService();
+        gameService.createGame(new CreateGameRequest("game1"));
+        Assertions.assertEquals(1, gameService.listGames().size());
+        gameService.clearAll();
+    }
 
     @Test
     @DisplayName("Join Game Test Pass")
@@ -62,5 +64,13 @@ public class GameServiceTests {
         GameService gameService = new GameService();
         Assertions.assertThrows(BadRequestException.class, () -> gameService.joinGame(new JoinGameRequest("BLACK", null), "Father"));
         gameService.clearAll();
+    }
+
+    @Test
+    @DisplayName("Clear Game Info")
+    public void clearGameInfo() throws BadRequestException {
+        GameService gameService = new GameService();
+        gameService.createGame(new CreateGameRequest("game1"));
+        Assertions.assertDoesNotThrow(() -> gameService.clearAll());
     }
 }
