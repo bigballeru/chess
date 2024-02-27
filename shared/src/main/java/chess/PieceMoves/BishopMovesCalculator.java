@@ -17,6 +17,6 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
 
         int[][] possibleMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
 
-        return PieceMovesCalculator.getMoves(board, position, moves, myRow, myCol, myColor, possibleMoves);
+        return PieceMovesCalculator.getMovesMoreThanOne(board, position, moves, myRow, myCol, myColor, possibleMoves);
     }
 }

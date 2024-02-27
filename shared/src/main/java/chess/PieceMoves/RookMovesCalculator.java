@@ -17,7 +17,7 @@ public class RookMovesCalculator implements PieceMovesCalculator {
 
         int[][] possibleMoves = {{1,0}, {-1,0}, {0,1}, {0,-1}};
 
-        return PieceMovesCalculator.getMoves(board, position, moves, myRow, myCol, myColor, possibleMoves);
+        return PieceMovesCalculator.getMovesMoreThanOne(board, position, moves, myRow, myCol, myColor, possibleMoves);
     }
 
 }

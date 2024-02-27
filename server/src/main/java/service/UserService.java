@@ -12,9 +12,6 @@ public class UserService {
     private static UserDAO userDAO = new MemoryUserDAO();
     private static AuthDAO authDAO = new MemoryAuthDAO();
 
-    public void UserService() {
-    }
-
     public String registerUser(UserData userData) throws AlreadyTakenException, BadRequestException {
         if (userData.username() == null || userData.email() == null || userData.password() == null) {
             throw new BadRequestException();

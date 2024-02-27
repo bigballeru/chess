@@ -11,7 +11,7 @@ import java.util.HashSet;
 public interface PieceMovesCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position);
 
-    static HashSet<ChessMove> getChessMoves(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor, int[][] possibleMoves) {
+    static HashSet<ChessMove> getMovesJustOne(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor, int[][] possibleMoves) {
         for (int[] m : possibleMoves) {
             int newRow = myRow;
             int newCol = myCol;
@@ -43,7 +43,7 @@ public interface PieceMovesCalculator {
         return moves;
     }
 
-    static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor, int[][] possibleMoves) {
+    static HashSet<ChessMove> getMovesMoreThanOne(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int myRow, int myCol, ChessGame.TeamColor myColor, int[][] possibleMoves) {
         for (int[] m : possibleMoves) {
             int newRow = myRow;
             int newCol = myCol;

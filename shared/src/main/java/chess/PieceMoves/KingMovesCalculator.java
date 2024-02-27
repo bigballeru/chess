@@ -19,6 +19,6 @@ public class KingMovesCalculator implements PieceMovesCalculator {
 
         int[][] possibleMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
 
-        return PieceMovesCalculator.getChessMoves(board, position, moves, myRow, myCol, myColor, possibleMoves);
+        return PieceMovesCalculator.getMovesJustOne(board, position, moves, myRow, myCol, myColor, possibleMoves);
     }
 }

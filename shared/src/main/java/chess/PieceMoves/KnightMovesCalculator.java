@@ -19,7 +19,7 @@ public class KnightMovesCalculator implements PieceMovesCalculator {
 
         int[][] possibleMoves = {{2,1}, {1,2}, {2,-1}, {1,-2}, {-2,1}, {-1,2}, {-2,-1}, {-1,-2}};
 
-        return PieceMovesCalculator.getChessMoves(board, position, moves, myRow, myCol, myColor, possibleMoves);
+        return PieceMovesCalculator.getMovesJustOne(board, position, moves, myRow, myCol, myColor, possibleMoves);
     }
 
 }
