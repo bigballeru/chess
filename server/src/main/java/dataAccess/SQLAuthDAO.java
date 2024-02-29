@@ -34,4 +34,15 @@ public class SQLAuthDAO implements AuthDAO {
     public String getUsername(String myAuth) {
         var statement = "SELECT username FROM auth WHERE authToken=?";
     }
+
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                `username` varchar(256) NOT NULL,
+                `authToken` varchar(256) NOT NULL,
+                PRIMARY KEY (`username`)
+                INDEX(authToken)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
 }
