@@ -2,7 +2,6 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
-import model.UserData;
 import model.requestresults.JoinGameRequest;
 
 import java.util.ArrayList;

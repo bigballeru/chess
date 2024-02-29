@@ -2,6 +2,7 @@ package serviceTests;
 
 import dataAccess.AlreadyTakenException;
 import dataAccess.BadRequestException;
+import dataAccess.DataAccessException;
 import model.UserData;
 import model.requestresults.CreateGameRequest;
 import model.requestresults.JoinGameRequest;
@@ -15,7 +16,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Create Game Test Pass")
-    public void createGameTestPass() throws BadRequestException {
+    public void createGameTestPass() throws BadRequestException, DataAccessException {
         GameService gameService = new GameService();
         Assertions.assertNotNull(gameService.createGame(new CreateGameRequest("testNewGame")));
         gameService.clearAll();
@@ -23,7 +24,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Create Game Test Fail")
-    public void createGameTestFail() {
+    public void createGameTestFail() throws DataAccessException {
         GameService gameService = new GameService();
         Assertions.assertThrows(BadRequestException.class, () -> gameService.createGame(new CreateGameRequest(null)));
         gameService.clearAll();
@@ -31,7 +32,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("List Games Test Pass")
-    public void listGamesTestPass() throws BadRequestException {
+    public void listGamesTestPass() throws BadRequestException, DataAccessException {
         GameService gameService = new GameService();
         gameService.createGame(new CreateGameRequest("game1"));
         gameService.createGame(new CreateGameRequest("game2"));
@@ -42,7 +43,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("List Games Test Pass 1")
-    public void listGamesTestPass1() throws BadRequestException {
+    public void listGamesTestPass1() throws BadRequestException, DataAccessException {
         GameService gameService = new GameService();
         gameService.createGame(new CreateGameRequest("game1"));
         Assertions.assertEquals(1, gameService.listGames().size());
@@ -51,7 +52,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Join Game Test Pass")
-    public void joinGameTestPass() throws BadRequestException, AlreadyTakenException {
+    public void joinGameTestPass() throws BadRequestException, AlreadyTakenException, DataAccessException {
         GameService gameService = new GameService();
         Integer gameID = gameService.createGame(new CreateGameRequest("game1"));
         Assertions.assertDoesNotThrow(() -> gameService.joinGame(new JoinGameRequest("BLACK", gameID), "Father"));
@@ -60,7 +61,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Join Game Test Fail")
-    public void joinGameTestFail() {
+    public void joinGameTestFail() throws DataAccessException {
         GameService gameService = new GameService();
         Assertions.assertThrows(BadRequestException.class, () -> gameService.joinGame(new JoinGameRequest("BLACK", null), "Father"));
         gameService.clearAll();
@@ -68,7 +69,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Clear Game Info")
-    public void clearGameInfo() throws BadRequestException {
+    public void clearGameInfo() throws BadRequestException, DataAccessException {
         GameService gameService = new GameService();
         gameService.createGame(new CreateGameRequest("game1"));
         Assertions.assertDoesNotThrow(() -> gameService.clearAll());

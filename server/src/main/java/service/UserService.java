@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public class UserService {
 
-    private static UserDAO userDAO;
-    private static AuthDAO authDAO;
+    private static UserDAO userDAO = new MemoryUserDAO();
+    private static AuthDAO authDAO = new MemoryAuthDAO();
 
     static {
         try {
@@ -69,5 +69,4 @@ public class UserService {
         userDAO.clearAll();
         authDAO.clearAll();
     }
-
 }

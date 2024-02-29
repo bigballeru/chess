@@ -7,13 +7,13 @@ import java.util.ArrayList;
 
 public interface GameDAO {
 
-    public void clearAll();
+    public void clearAll() throws DataAccessException;
 
-    public int createGame(String gameName);
+    public int createGame(String gameName) throws DataAccessException;
 
-    public boolean checkGameID(Integer gameID);
+    public boolean checkGameID(Integer gameID) throws DataAccessException;
 
-    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException;
+    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException;
 
-    public ArrayList<GameData> listGames();
+    public ArrayList<GameData> listGames() throws DataAccessException;
 }

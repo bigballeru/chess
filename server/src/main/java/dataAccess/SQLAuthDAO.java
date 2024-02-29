@@ -60,7 +60,7 @@ public class SQLAuthDAO implements AuthDAO {
                 ps.setString(1, myAuth);
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return readAuth(rs);
+                        return rs.getString("username");
                     }
                 }
             }
@@ -69,11 +69,6 @@ public class SQLAuthDAO implements AuthDAO {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
         return null;
-    }
-
-    private String readAuth(ResultSet rs) throws SQLException {
-        var authToken = rs.getString("authToken");
-        return authToken;
     }
 
     private final String[] createStatements = {
