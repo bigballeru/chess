@@ -10,9 +10,17 @@ import java.util.UUID;
 public class UserService {
 
     private static UserDAO userDAO = new MemoryUserDAO();
-    private static AuthDAO authDAO = new MemoryAuthDAO();
+    private static AuthDAO authDAO;
 
-    public String registerUser(UserData userData) throws AlreadyTakenException, BadRequestException {
+    static {
+        try {
+            authDAO = new SQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String registerUser(UserData userData) throws AlreadyTakenException, BadRequestException, DataAccessException {
         if (userData.username() == null || userData.email() == null || userData.password() == null) {
             throw new BadRequestException();
         }
@@ -26,7 +34,7 @@ public class UserService {
         return myUUID;
     }
 
-    public String loginUser(LoginRequest loginData) throws UnauthorizedRequestException {
+    public String loginUser(LoginRequest loginData) throws UnauthorizedRequestException, DataAccessException {
         if (userDAO.getUser(loginData.username()) == null) {
             throw new UnauthorizedRequestException();
         }
@@ -39,24 +47,24 @@ public class UserService {
         return myUUID;
     }
 
-    public void logoutUser(String authCode) throws UnauthorizedRequestException {
+    public void logoutUser(String authCode) throws UnauthorizedRequestException, DataAccessException {
         if (!authDAO.validateAuth(authCode)) {
             throw new UnauthorizedRequestException();
         }
         authDAO.deleteAuth(authCode);
     }
 
-    public void validateAuth(String authCode) throws UnauthorizedRequestException {
+    public void validateAuth(String authCode) throws UnauthorizedRequestException, DataAccessException {
         if (!authDAO.validateAuth(authCode)) {
             throw new UnauthorizedRequestException();
         }
     }
 
-    public String getUsername(String authCode) {
+    public String getUsername(String authCode) throws DataAccessException {
         return authDAO.getUsername(authCode);
     }
 
-    public void clearAll() {
+    public void clearAll() throws DataAccessException {
         userDAO.clearAll();
         authDAO.clearAll();
     }

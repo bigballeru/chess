@@ -14,11 +14,13 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public int createGame(String gameName) {
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gamename, game) VALUES (?,?,?,?,?)";
+        return 0; //TODO
     }
 
     @Override
     public boolean checkGameID(Integer gameID) {
         var statement = "SELECT gameID FROM games WHERE gameID=?";
+        return false; //TODO
     }
 
     @Override
@@ -29,6 +31,7 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public ArrayList<GameData> listGames() {
         var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, game FROM games";
+        return null;
     }
 
     private final String[] createStatements = {

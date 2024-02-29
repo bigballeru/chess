@@ -6,6 +6,7 @@ public class SQLUserDAO implements UserDAO{
     @Override
     public UserData getUser(String username) {
         var statement = "SELECT username, password, email FROM users WHERE username=?";
+        return null; //TODO
     }
 
     @Override
@@ -21,6 +22,7 @@ public class SQLUserDAO implements UserDAO{
     @Override
     public boolean checkPassword(String username, String password) {
         var statement = "SELECT password FROM users WHERE username=?";
+        return false; //TODO
     }
 
     private final String[] createStatements = {

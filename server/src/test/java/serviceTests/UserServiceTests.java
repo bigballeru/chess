@@ -1,11 +1,9 @@
 package serviceTests;
 
-import dataAccess.AlreadyTakenException;
-import dataAccess.BadRequestException;
-import dataAccess.UnauthorizedRequestException;
+import dataAccess.*;
+import model.AuthData;
 import model.UserData;
 import model.requestresults.LoginRequest;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +13,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register User Pass")
-    public void registerUserPass() throws BadRequestException, AlreadyTakenException {
+    public void registerUserPass() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserService userService = new UserService();
         Assertions.assertNotNull(userService.registerUser(new UserData("testuser", "password", "test@gmail.com")));
         userService.clearAll();
@@ -23,7 +21,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register User Fail")
-    public void registerUserFail() {
+    public void registerUserFail() throws DataAccessException {
         UserService userService = new UserService();
         Assertions.assertThrows(BadRequestException.class, () -> userService.registerUser(new UserData(null, "password", "test@gmail.com")));
         userService.clearAll();
@@ -31,7 +29,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Login User Pass")
-    public void loginUserPass() throws BadRequestException, AlreadyTakenException, UnauthorizedRequestException {
+    public void loginUserPass() throws BadRequestException, AlreadyTakenException, UnauthorizedRequestException, DataAccessException {
         UserService userService = new UserService();
         userService.registerUser(new UserData("testuser", "password", "test@gmail.com"));
         Assertions.assertNotNull(userService.loginUser(new LoginRequest("testuser", "password")));
@@ -40,7 +38,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Login User Fail")
-    public void loginUserFail() throws BadRequestException, AlreadyTakenException {
+    public void loginUserFail() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserService userService = new UserService();
         userService.registerUser(new UserData("username", "password", "test@gmail.com"));
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> userService.loginUser(new LoginRequest("username", "wrong")));
@@ -48,8 +46,16 @@ public class UserServiceTests {
     }
 
     @Test
+    public void createAuth() throws DataAccessException {
+        SQLAuthDAO sqlAuthDAO = new SQLAuthDAO();
+        sqlAuthDAO.createAuth(new AuthData("1249192049", "user"));
+        Assertions.assertEquals(0,0);
+        sqlAuthDAO.clearAll();
+    }
+
+    @Test
     @DisplayName("Logout User Pass")
-    public void logoutUserPass() throws BadRequestException, AlreadyTakenException {
+    public void logoutUserPass() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserService userService = new UserService();
         String authToken = userService.registerUser(new UserData("testuser", "password", "test@gmail.com"));
         Assertions.assertDoesNotThrow(() -> userService.logoutUser(authToken));
@@ -58,7 +64,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Logout User Fail")
-    public void logoutUserFail() {
+    public void logoutUserFail() throws DataAccessException {
         UserService userService = new UserService();
         Assertions.assertThrows(UnauthorizedRequestException.class, () -> userService.logoutUser(null));
         userService.clearAll();
@@ -66,7 +72,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Clear User Info")
-    public void clearUserInfo() throws BadRequestException, AlreadyTakenException {
+    public void clearUserInfo() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserService userService = new UserService();
         userService.registerUser(new UserData("username", "password", "test@gmail.com"));
         Assertions.assertDoesNotThrow(() -> userService.clearAll());

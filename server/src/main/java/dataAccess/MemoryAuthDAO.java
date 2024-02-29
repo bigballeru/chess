@@ -2,6 +2,9 @@ package dataAccess;
 
 import com.google.gson.Gson;
 import model.AuthData;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
