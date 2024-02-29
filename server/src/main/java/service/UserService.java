@@ -9,12 +9,13 @@ import java.util.UUID;
 
 public class UserService {
 
-    private static UserDAO userDAO = new MemoryUserDAO();
+    private static UserDAO userDAO;
     private static AuthDAO authDAO;
 
     static {
         try {
             authDAO = new SQLAuthDAO();
+            userDAO = new SQLUserDAO();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
