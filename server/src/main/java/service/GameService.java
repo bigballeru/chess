@@ -9,7 +9,6 @@ import model.requestresults.CreateGameRequest;
 import model.requestresults.JoinGameRequest;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class GameService {
     private static GameDAO gameDAO = new MemoryGameDAO();

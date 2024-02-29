@@ -1,5 +1,6 @@
 package dataAccess;
 
+import com.google.gson.Gson;
 import model.AuthData;
 import java.util.ArrayList;
 import java.util.Objects;
