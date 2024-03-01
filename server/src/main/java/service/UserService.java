@@ -4,6 +4,7 @@ import dataAccess.*;
 import model.AuthData;
 import model.UserData;
 import model.requestresults.LoginRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.UUID;
 
@@ -25,10 +26,12 @@ public class UserService {
         if (userData.username() == null || userData.email() == null || userData.password() == null) {
             throw new BadRequestException();
         }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(userData.password());
         if (userDAO.getUser(userData.username()) != null) {
             throw new AlreadyTakenException();
         }
-        userDAO.addUser(userData.username(), userData.password(), userData.email());
+        userDAO.addUser(userData.username(), hashedPassword, userData.email());
         String myUUID = UUID.randomUUID().toString();
         AuthData newAuth = new AuthData(myUUID, userData.username());
         authDAO.createAuth(newAuth);

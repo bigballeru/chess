@@ -2,6 +2,7 @@ package dataAccess;
 
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,7 +58,8 @@ public class SQLUserDAO implements UserDAO{
                 ps.setString(1, username);
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return (Objects.equals(password, rs.getString("password")));
+                        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                        return (encoder.matches(password, rs.getString("password")));
                     }
                 }
             }
