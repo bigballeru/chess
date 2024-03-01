@@ -45,6 +45,7 @@ public class GameServiceTests {
     @DisplayName("List Games Test Pass 1")
     public void listGamesTestPass1() throws BadRequestException, DataAccessException {
         GameService gameService = new GameService();
+        gameService.clearAll();
         gameService.createGame(new CreateGameRequest("game1"));
         Assertions.assertEquals(1, gameService.listGames().size());
         gameService.clearAll();

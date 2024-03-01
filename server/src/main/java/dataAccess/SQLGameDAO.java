@@ -25,11 +25,11 @@ public class SQLGameDAO implements GameDAO{
     }
 
     @Override
-    public int createGame(String gamename) throws DataAccessException {
-        var statement = "INSERT INTO games (gamename, game) VALUES (?,?)";
+    public int createGame(String gameName) throws DataAccessException {
+        var statement = "INSERT INTO games (gameName, game) VALUES (?,?)";
         ChessGame myGame = new ChessGame();
         var gameJson = new Gson().toJson(myGame);
-        return executeUpdate(statement, gamename, gameJson);
+        return executeUpdate(statement, gameName, gameJson);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SQLGameDAO implements GameDAO{
     public ArrayList<GameData> listGames() throws DataAccessException {
         var result = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, game FROM games";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -107,10 +107,10 @@ public class SQLGameDAO implements GameDAO{
         var gameID = rs.getInt("gameID");
         var whiteUsername = rs.getString("whiteUsername");
         var blackUsername = rs.getString("blackUsername");
-        var gamename = rs.getString("gamename");
+        var gameName = rs.getString("gameName");
         String game = rs.getString("game");
         ChessGame gameObj = new Gson().fromJson(game, ChessGame.class);
-        return new GameData(gameID, whiteUsername, blackUsername, gamename, gameObj);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, gameObj);
     }
 
     private final String[] createStatements = {
@@ -119,7 +119,7 @@ public class SQLGameDAO implements GameDAO{
                 `gameID` int NOT NULL AUTO_INCREMENT,
                 `whiteUsername` varchar(256),
                 `blackUsername` varchar(256),
-                `gamename` varchar(256) NOT NULL,
+                `gameName` varchar(256) NOT NULL,
                 `game` TEXT NOT NULL,
                 PRIMARY KEY (`gameID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

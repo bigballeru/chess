@@ -43,7 +43,7 @@ public class MemoryGameDAO implements GameDAO {
                 if (Objects.equals(joinGameRequest.playerColor(), "BLACK")) {
                     if (game.blackUsername() == null) {
                         gameToRemove = game;
-                        updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gamename(), game.game());
+                        updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
                     }
                     else {
                         throw new AlreadyTakenException();
@@ -52,7 +52,7 @@ public class MemoryGameDAO implements GameDAO {
                 if (Objects.equals(joinGameRequest.playerColor(), "WHITE")) {
                     if (game.blackUsername() == null) {
                         gameToRemove = game;
-                        updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gamename(), game.game());
+                        updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
                     }
                     else {
                         throw new AlreadyTakenException();
