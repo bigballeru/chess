@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public class UserService {
 
-    private static UserDAO userDAO = new MemoryUserDAO();
-    private static AuthDAO authDAO = new MemoryAuthDAO();
+    private static UserDAO userDAO;
+    private static AuthDAO authDAO;
 
     static {
         try {

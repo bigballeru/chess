@@ -8,7 +8,7 @@ import model.requestresults.JoinGameRequest;
 import java.util.ArrayList;
 
 public class GameService {
-    private static GameDAO gameDAO = new MemoryGameDAO();
+    private static GameDAO gameDAO;
 
     static {
         try {
