@@ -40,8 +40,10 @@ public class SQLUserDAO implements UserDAO{
 
     @Override
     public void addUser(String username, String password, String email) throws DataAccessException {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
         var statement = "INSERT INTO users (username, password, email) VALUES (?,?,?)";
-        executeUpdate(statement, username, password, email);
+        executeUpdate(statement, username, hashedPassword, email);
     }
 
     @Override

@@ -26,12 +26,10 @@ public class UserService {
         if (userData.username() == null || userData.email() == null || userData.password() == null) {
             throw new BadRequestException();
         }
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(userData.password());
         if (userDAO.getUser(userData.username()) != null) {
             throw new AlreadyTakenException();
         }
-        userDAO.addUser(userData.username(), hashedPassword, userData.email());
+        userDAO.addUser(userData.username(), userData.password(), userData.email());
         String myUUID = UUID.randomUUID().toString();
         AuthData newAuth = new AuthData(myUUID, userData.username());
         authDAO.createAuth(newAuth);
