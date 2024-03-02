@@ -18,6 +18,7 @@ public class SQLGameDAO implements GameDAO{
     public SQLGameDAO() throws DataAccessException {
         configureDatabase();
     }
+
     @Override
     public void clearAll() throws DataAccessException {
         var statement = "TRUNCATE games";
@@ -53,6 +54,7 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException {
+        // TODO - may need to fix this to check for the game before returning nothing
         if (joinGameRequest.playerColor() == null) {
             return;
         }
