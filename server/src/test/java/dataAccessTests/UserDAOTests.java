@@ -19,8 +19,8 @@ public class UserDAOTests {
     }
 
     @Test
-    @DisplayName("Get User Test Pass")
-    public void getUserTestPass() throws DataAccessException {
+    @DisplayName("Get User Test Pass 1")
+    public void getUserTestPass1() throws DataAccessException {
         SQLUserDAO sqlUserDAO = new SQLUserDAO();
         sqlUserDAO.addUser("user","password","email");
         var checkUser = new UserData("user", "password", "email");
@@ -30,9 +30,14 @@ public class UserDAOTests {
     }
 
     @Test
-    @DisplayName("Get User Test Fail")
-    public void getUserTestFail() throws DataAccessException {
-        // TODO - figure this one out
+    @DisplayName("Get User Test Pass 2")
+    public void getUserTestPass2() throws DataAccessException {
+        SQLUserDAO sqlUserDAO = new SQLUserDAO();
+        sqlUserDAO.addUser("bob","password","bobby");
+        var checkUser = new UserData("bob", "password", "bobby");
+        var returnedUser = sqlUserDAO.getUser("bob");
+        Assertions.assertEquals(checkUser.username(), returnedUser.username());
+        Assertions.assertEquals(checkUser.email(), returnedUser.email());
     }
 
     @Test
@@ -58,16 +63,18 @@ public class UserDAOTests {
     }
 
     @Test
-    @DisplayName("Check Password Test Pass")
-    public void checkPasswordTestPass() throws DataAccessException {
+    @DisplayName("Check Password Test Pass 1")
+    public void checkPasswordTestPass1() throws DataAccessException {
         SQLUserDAO sqlUserDAO = new SQLUserDAO();
         sqlUserDAO.addUser("username","password","email");
         Assertions.assertTrue(sqlUserDAO.checkPassword("username","password"));
     }
 
     @Test
-    @DisplayName("Check Password Test Fail")
-    public void checkPasswordTestFail() throws DataAccessException {
-        // TODO - figure this one out
+    @DisplayName("Check Password Test Pass 2")
+    public void checkPasswordTestPass2() throws DataAccessException {
+        SQLUserDAO sqlUserDAO = new SQLUserDAO();
+        sqlUserDAO.addUser("username","passwor","email");
+        Assertions.assertFalse(sqlUserDAO.checkPassword("username","password"));
     }
 }

@@ -61,8 +61,8 @@ public class AuthDAOTests {
     }
 
     @Test
-    @DisplayName("Delete Auth Test Pass")
-    public void deleteAuthTestPass() throws DataAccessException {
+    @DisplayName("Delete Auth Test Pass 1")
+    public void deleteAuthTestPass1() throws DataAccessException {
         SQLAuthDAO sqlAuthDAO = new SQLAuthDAO();
         sqlAuthDAO.createAuth(new AuthData("12345", "user"));
         sqlAuthDAO.deleteAuth("12345");
@@ -76,22 +76,33 @@ public class AuthDAOTests {
     }
 
     @Test
-    @DisplayName("Delete Auth Test Fail")
-    public void deleteAuthTestFail() throws DataAccessException {
-        // TODO - figure out what to do to fail or see if I can succeed twice
+    @DisplayName("Delete Auth Test Pass 2")
+    public void deleteAuthTestPass2() throws DataAccessException {
+        SQLAuthDAO sqlAuthDAO = new SQLAuthDAO();
+        sqlAuthDAO.createAuth(new AuthData("14512", "user"));
+        sqlAuthDAO.deleteAuth("14512");
+        Assertions.assertFalse(() -> {
+            try {
+                return sqlAuthDAO.validateAuth("14512");
+            } catch (DataAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Test
-    @DisplayName("Get Username Test Pass")
-    public void getUsernameTestPass() throws DataAccessException {
+    @DisplayName("Get Username Test Pass 1")
+    public void getUsernameTestPass1() throws DataAccessException {
         SQLAuthDAO sqlAuthDAO = new SQLAuthDAO();
         sqlAuthDAO.createAuth(new AuthData("12345","user"));
         Assertions.assertEquals("user", sqlAuthDAO.getUsername("12345"));
     }
 
     @Test
-    @DisplayName("Get Username Test Fail")
-    public void getUsernameTestFail() throws DataAccessException {
-        // TODO - figure out what to do to fail or see if I can succeed twice
+    @DisplayName("Get Username Test Pass 2")
+    public void getUsernameTestPass2() throws DataAccessException {
+        SQLAuthDAO sqlAuthDAO = new SQLAuthDAO();
+        sqlAuthDAO.createAuth(new AuthData("72812","lover"));
+        Assertions.assertEquals("lover", sqlAuthDAO.getUsername("72812"));
     }
 }

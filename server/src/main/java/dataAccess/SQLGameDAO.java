@@ -53,11 +53,8 @@ public class SQLGameDAO implements GameDAO{
     }
 
     @Override
-    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException {
-        // TODO - may need to fix this to check for the game before returning nothing
-        if (joinGameRequest.playerColor() == null) {
-            return;
-        }
+    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException, BadRequestException {
+        // TODO - fixed so that does nothing if game is null and throws BadRequestException if there is no game?
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername FROM games WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -66,6 +63,9 @@ public class SQLGameDAO implements GameDAO{
                     if (rs.next()) {
                         var updateWhiteStatement = "UPDATE games SET whiteUsername=? WHERE gameID=?";
                         var updateBlackStatement = "UPDATE games SET blackUsername=? WHERE gameID=?";
+                        if (joinGameRequest.playerColor() == null) {
+                            return;
+                        }
                         if (joinGameRequest.playerColor().equals("BLACK") && rs.getString("blackUsername") == null) {
                             executeUpdate(updateBlackStatement, username, joinGameRequest.gameID());
                         }
@@ -76,11 +76,17 @@ public class SQLGameDAO implements GameDAO{
                             throw new AlreadyTakenException();
                         }
                     }
+                    else {
+                        throw new BadRequestException();
+                    }
                 }
             }
         }
         catch (AlreadyTakenException e) {
             throw new AlreadyTakenException();
+        }
+        catch (BadRequestException e) {
+            throw new BadRequestException();
         }
         catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));

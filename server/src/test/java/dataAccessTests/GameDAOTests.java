@@ -70,16 +70,17 @@ public class GameDAOTests {
     }
 
     @Test
-    @DisplayName("List Games Test Pass")
-    public void listGamesTestPass() throws DataAccessException {
+    @DisplayName("List Games Test Pass 1")
+    public void listGamesTestPass1() throws DataAccessException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         sqlGameDAO.createGame("game1");
         Assertions.assertDoesNotThrow(() -> sqlGameDAO.listGames());
     }
 
     @Test
-    @DisplayName("List Games Test Fail")
-    public void listGamesTestFail() throws DataAccessException {
-        //TODO - how to get to throw error
+    @DisplayName("List Games Test Pass 2")
+    public void listGamesTestPass2() throws DataAccessException {
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        Assertions.assertDoesNotThrow(() -> sqlGameDAO.listGames());
     }
 }
