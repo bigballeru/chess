@@ -1,3 +1,4 @@
+package serverFacade;
 
 import com.google.gson.Gson;
 import model.AuthData;
@@ -9,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
-import java.util.List;
 
 public class ServerFacade {
 
@@ -17,6 +17,21 @@ public class ServerFacade {
 
     public ServerFacade(String url) {
         serverUrl = url;
+    }
+
+    public RegisterAndLoginResult clearDb() throws ResponseException {
+        var path = "/db";
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("DELETE");
+
+            http.connect();
+            throwIfNotSuccessful(http);
+            return readBody(http, RegisterAndLoginResult.class);
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public RegisterAndLoginResult registerUser(UserData userData) throws ResponseException {

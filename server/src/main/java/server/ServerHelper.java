@@ -88,7 +88,8 @@ public class ServerHelper {
             gameService.clearAll();
             userService.clearAll();
             response.status(200);
-            return "{}";
+            RegisterAndLoginResult toReturn = new RegisterAndLoginResult(null, null, null);
+            return new Gson().toJson(toReturn);
         } catch (Exception e) {
             response.body(new Gson().toJson(e.getMessage()));
             RegisterAndLoginResult toReturn = new RegisterAndLoginResult(null, null, e.getMessage());
