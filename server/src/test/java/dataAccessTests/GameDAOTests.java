@@ -1,5 +1,7 @@
 package dataAccessTests;
 
+import chess.ChessGame;
+import dataAccess.BadRequestException;
 import dataAccess.DataAccessException;
 import dataAccess.SQLGameDAO;
 import model.requestresults.JoinGameRequest;
@@ -82,5 +84,15 @@ public class GameDAOTests {
     public void listGamesTestPass2() throws DataAccessException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         Assertions.assertDoesNotThrow(() -> sqlGameDAO.listGames());
+    }
+
+    @Test
+    @DisplayName("Piece Move Test")
+    public void pieceMovetest() throws DataAccessException, BadRequestException {
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        Integer gameID = sqlGameDAO.createGame("game");
+        sqlGameDAO.updateGame(1, new ChessGame());
+        ChessGame myGame = sqlGameDAO.checkGame(gameID);
+        System.out.println(myGame.toString());
     }
 }
