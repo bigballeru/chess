@@ -20,6 +20,7 @@ public class Main {
             AuthData authData = preLoginUI.run();
             postLoginUI.run(authData);
             preLoginUI.logOut();
+            postLoginUI.reset();
         }
     }
 }

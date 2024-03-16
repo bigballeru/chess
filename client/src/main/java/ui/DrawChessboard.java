@@ -20,7 +20,7 @@ public class DrawChessboard {
     private static final String BLACK_SQUARE = SET_BG_COLOR_BLACK + "   ";
     private static final List<String> LETTER_COORDINATES = Arrays.asList(" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ");
 
-    public static void main(String[] args) {
+    public static void run () {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         ChessBoard chessBoard = new ChessBoard();

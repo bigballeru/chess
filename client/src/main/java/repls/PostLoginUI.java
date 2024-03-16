@@ -5,6 +5,7 @@ import model.UserData;
 import model.requestresults.*;
 import serverFacade.ResponseException;
 import serverFacade.ServerFacade;
+import ui.DrawChessboard;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -13,6 +14,7 @@ import static ui.EscapeSequences.*;
 
 public class PostLoginUI {
 
+    private DrawChessboard drawChessboard = new DrawChessboard();
     private AuthData authData = null;
     private String url = "http://localhost:8080";
     private State state = State.SIGNEDIN;
@@ -40,6 +42,10 @@ public class PostLoginUI {
         if (result.equals("  quit")) {
             System.exit(0);
         }
+    }
+
+    public void reset() {
+        state = State.SIGNEDIN;
     }
 
     public String eval(String input) {
@@ -92,6 +98,7 @@ public class PostLoginUI {
             Integer gameID = Integer.parseInt(params[0]);
 
             serverFacade.joinGame(new JoinGameRequest(null,gameID), authData);
+            drawChessboard.run();
             return String.format(" You are now watching game %s", params[0]);
         }
         if (params.length == 2) {
@@ -100,6 +107,7 @@ public class PostLoginUI {
             String color = params[1];
 
             serverFacade.joinGame(new JoinGameRequest(color, gameID), authData);
+            drawChessboard.run();
             return String.format(" You successfully joined game %s", params[0]);
         }
         throw new ResponseException(400, " Need <ID> [WHITE]");
