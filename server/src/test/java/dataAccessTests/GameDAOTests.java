@@ -61,7 +61,7 @@ public class GameDAOTests {
     public void joinGameTestPass() throws DataAccessException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         int gameID = sqlGameDAO.createGame("game1");
-        Assertions.assertDoesNotThrow(() -> sqlGameDAO.joinGame(new JoinGameRequest("BLACK", gameID), "user"));
+        Assertions.assertDoesNotThrow(() -> sqlGameDAO.joinGame(new JoinGameRequest("black", gameID), "user"));
     }
 
     @Test

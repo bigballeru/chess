@@ -66,10 +66,10 @@ public class SQLGameDAO implements GameDAO{
                         if (joinGameRequest.playerColor() == null) {
                             return;
                         }
-                        if (joinGameRequest.playerColor().equals("black") && rs.getString("blackUsername") == null) {
+                        if ((joinGameRequest.playerColor().equals("black") || joinGameRequest.playerColor().equals("BLACK")) && rs.getString("blackUsername") == null) {
                             executeUpdate(updateBlackStatement, username, joinGameRequest.gameID());
                         }
-                        else if (joinGameRequest.playerColor().equals("white") && rs.getString("whiteUsername") == null) {
+                        else if ((joinGameRequest.playerColor().equals("white") || joinGameRequest.playerColor().equals("WHITE")) && rs.getString("whiteUsername") == null) {
                             executeUpdate(updateWhiteStatement, username, joinGameRequest.gameID());
                         }
                         else {

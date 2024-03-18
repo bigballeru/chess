@@ -123,7 +123,7 @@ public class ServerFacadeTests {
         serverFacade.clearDb();
         RegisterAndLoginResult authCode = serverFacade.registerUser(new UserData("user", "password", "email"));
         CreateGameResult gameID = serverFacade.createGame(new CreateGameRequest("test1"), new AuthData(authCode.authToken(), "user"));
-        Assertions.assertDoesNotThrow(() -> serverFacade.joinGame(new JoinGameRequest("BLACK", gameID.gameID()), new AuthData(authCode.authToken(), "user")));
+        Assertions.assertDoesNotThrow(() -> serverFacade.joinGame(new JoinGameRequest("black", gameID.gameID()), new AuthData(authCode.authToken(), "user")));
     }
 
     @Test
