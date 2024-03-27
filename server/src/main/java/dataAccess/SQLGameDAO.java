@@ -53,7 +53,7 @@ public class SQLGameDAO implements GameDAO{
     }
 
     @Override
-    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException, BadRequestException {
+    public void joinGame(JoinGameRequest joinGameRequest, String username, Boolean masterRequest) throws AlreadyTakenException, DataAccessException, BadRequestException {
         // TODO - fixed so that does nothing if game is null and throws BadRequestException if there is no game?
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername FROM games WHERE gameID=?";
@@ -66,10 +66,10 @@ public class SQLGameDAO implements GameDAO{
                         if (joinGameRequest.playerColor() == null) {
                             return;
                         }
-                        if ((joinGameRequest.playerColor().equals("black") || joinGameRequest.playerColor().equals("BLACK")) && rs.getString("blackUsername") == null) {
+                        if ((joinGameRequest.playerColor().equals("black") || joinGameRequest.playerColor().equals("BLACK")) && (rs.getString("blackUsername") == null) || masterRequest) {
                             executeUpdate(updateBlackStatement, username, joinGameRequest.gameID());
                         }
-                        else if ((joinGameRequest.playerColor().equals("white") || joinGameRequest.playerColor().equals("WHITE")) && rs.getString("whiteUsername") == null) {
+                        else if ((joinGameRequest.playerColor().equals("white") || joinGameRequest.playerColor().equals("WHITE")) && (rs.getString("whiteUsername") == null) || masterRequest) {
                             executeUpdate(updateWhiteStatement, username, joinGameRequest.gameID());
                         }
                         else {

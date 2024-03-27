@@ -1,0 +1,227 @@
+package websocket;
+
+import chess.ChessMove;
+import com.google.gson.Gson;
+import dataAccess.SQLGameDAO;
+import model.GameData;
+import model.requestresults.JoinGameRequest;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import service.GameService;
+import service.UserService;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.UserGameCommand;
+import chess.ChessGame;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
+@WebSocket
+public class WebSocketHandler {
+
+    private final WebSocketSessions webSocketSessions = new WebSocketSessions();
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws IOException {
+        UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
+        switch (userGameCommand.getCommandType()) {
+            case JOIN_PLAYER -> joinPlayer(userGameCommand.getGameID(), userGameCommand.getAuthString(), userGameCommand.getPlayerColor(), session);
+            case JOIN_OBSERVER -> joinObserver(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
+            case MAKE_MOVE -> makeMove(userGameCommand.getGameID(), userGameCommand.getAuthString(), userGameCommand.getChessMove(), session);
+            case LEAVE -> leave(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
+            case RESIGN -> resign(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
+        }
+    }
+
+    public void joinPlayer(Integer gameID, String authToken, ChessGame.TeamColor teamColor, Session session) throws IOException {
+        try {
+            String username;
+            ChessGame mygame = null;
+            UserService userService = new UserService();
+            username = userService.getUsername(authToken);
+            GameService gameService = new GameService();
+            ArrayList<GameData> games = gameService.listGames();
+            for (GameData g : games) {
+                if (g.gameID() == gameID) {
+                    if ((teamColor == ChessGame.TeamColor.WHITE) && (Objects.equals(username, g.whiteUsername()))) {
+                        mygame = g.game();
+                        break;
+                    }
+                    else if ((teamColor == ChessGame.TeamColor.BLACK) && (Objects.equals(username, g.blackUsername()))) {
+                        mygame = g.game();
+                        break;
+                    }
+                    else {
+                        throw new Exception("Username doesn't match username in DB");
+                    }
+                }
+            }
+            webSocketSessions.addSessionToGame(gameID, authToken, session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), session);
+            String message = username + " joined the game as color " + teamColor.toString();
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+        } catch (Exception e) {
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+        }
+    }
+
+    public void joinObserver(Integer gameID, String authToken, Session session) throws IOException {
+        try {
+            ChessGame mygame = null;
+            UserService userService = new UserService();
+            String username = userService.getUsername(authToken);
+            GameService gameService = new GameService();
+            ArrayList<GameData> games = gameService.listGames();
+            for (GameData g : games) {
+                if (g.gameID() == gameID) {
+                    mygame = g.game();
+                    break;
+                }
+            }
+            if (mygame == null) {
+                throw new Exception("Game does not exist");
+            }
+            webSocketSessions.addSessionToGame(gameID, authToken, session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), session);
+            String message = username + " joined the game as an observer.";
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+        } catch (Exception e) {
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+        }
+    }
+
+    //FIXME - need to add functionality for when in check/checkmate
+    public void makeMove(Integer gameID, String authToken, ChessMove chessMove, Session session) throws IOException {
+        try {
+            ChessGame mygame = null;
+            UserService userService = new UserService();
+            String username = userService.getUsername(authToken);
+            GameService gameService = new GameService();
+            ArrayList<GameData> games = gameService.listGames();
+            for (GameData g : games) {
+                if (g.gameID() == gameID) {
+                    SQLGameDAO sqlGameDAO = new SQLGameDAO();
+                    if (Objects.equals(g.blackUsername(), username)) {
+                        if (g.game().getTeamTurn() == ChessGame.TeamColor.BLACK) {
+                            g.game().makeMove(chessMove);
+                            g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
+                            sqlGameDAO.updateGame(gameID, g.game());
+                        }
+                        else {
+                            throw new Exception("Wrong color - white's turn");
+                        }
+                    }
+                    else if (Objects.equals(g.whiteUsername(), username)) {
+                        if (g.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                            g.game().makeMove(chessMove);
+                            g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
+                            sqlGameDAO.updateGame(gameID, g.game());
+                        }
+                        else {
+                            throw new Exception("Wrong color - black's turn");
+                        }
+                    }
+                    else {
+                        throw new Exception("You are not playing in this game");
+                    }
+                    mygame = g.game();
+                    break;
+                }
+            }
+            if (mygame == null) {
+                throw new Exception("Game does not exist");
+            }
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), null);
+            String message = username + " made the move //FIXME";
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+        } catch (Exception e) {
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+        }
+    }
+
+    public void leave(Integer gameID, String authToken, Session session) throws IOException {
+        try {
+            ChessGame mygame = null;
+            UserService userService = new UserService();
+            String username = userService.getUsername(authToken);
+            GameService gameService = new GameService();
+            ArrayList<GameData> games = gameService.listGames();
+            for (GameData g : games) {
+                if (g.gameID() == gameID) {
+                    SQLGameDAO sqlGameDAO = new SQLGameDAO();
+                    if (Objects.equals(g.whiteUsername(), username)) {
+                        sqlGameDAO.joinGame(new JoinGameRequest("white", gameID), null, true);
+                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                    }
+                    else if (Objects.equals(g.blackUsername(), username)) {
+                        sqlGameDAO.joinGame(new JoinGameRequest("black", gameID), null, true);
+                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                    }
+                    else {
+                        throw new Exception("You are not a player");
+                    }
+                }
+            }
+            if (mygame == null) {
+                throw new Exception("Game does not exist");
+            }
+            String message = username + " has left the game";
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+        } catch (Exception e) {
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+        }
+    }
+
+    //FIXME - add stuff to end gameplay and udpate that in server
+    public void resign(Integer gameID, String authToken, Session session) throws IOException {
+        try {
+            ChessGame mygame = null;
+            UserService userService = new UserService();
+            String username = userService.getUsername(authToken);
+            GameService gameService = new GameService();
+            ArrayList<GameData> games = gameService.listGames();
+            for (GameData g : games) {
+                if (g.gameID() == gameID) {
+                    SQLGameDAO sqlGameDAO = new SQLGameDAO();
+                    if (Objects.equals(g.whiteUsername(), username)) {
+                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                    }
+                    else if (Objects.equals(g.blackUsername(), username)) {
+                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                    }
+                    else {
+                        throw new Exception("You are not a player");
+                    }
+                }
+            }
+            if (mygame == null) {
+                throw new Exception("Game does not exist");
+            }
+            String message = username + " has resigned the game";
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+        } catch (Exception e) {
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+        }
+    }
+
+    public void sendMessage(Integer gameID, ServerMessage message, Session session) throws IOException {
+        session.getRemote().sendString(new Gson().toJson(message));
+    }
+
+    public void broadcastMessage(Integer gameID, ServerMessage message, String exceptThisAuthToken) throws IOException {
+        HashMap<String, Session> connections = webSocketSessions.getSessionsForGame(gameID);
+
+        for (HashMap.Entry<String, Session> entry : connections.entrySet()) {
+            if (entry.getValue().isOpen()) {
+                if (!Objects.equals(entry.getKey(), exceptThisAuthToken)) {
+                    entry.getValue().getRemote().sendString(new Gson().toJson(message));
+                }
+            }
+            else {
+                webSocketSessions.removeSessionFromGame(gameID, entry.getKey(), entry.getValue());
+            }
+        }
+    }
+}

@@ -35,7 +35,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException {
+    public void joinGame(JoinGameRequest joinGameRequest, String username, Boolean masterRequest) throws AlreadyTakenException {
         GameData gameToRemove = null;
         GameData updatedGame = null;
         for (GameData game : myGames) {

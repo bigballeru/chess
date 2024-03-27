@@ -13,7 +13,7 @@ public interface GameDAO {
 
     public boolean checkGameID(Integer gameID) throws DataAccessException;
 
-    public void joinGame(JoinGameRequest joinGameRequest, String username) throws AlreadyTakenException, DataAccessException, BadRequestException;
+    public void joinGame(JoinGameRequest joinGameRequest, String username, Boolean masterRequest) throws AlreadyTakenException, DataAccessException, BadRequestException;
 
     public ArrayList<GameData> listGames() throws DataAccessException;
 }

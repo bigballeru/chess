@@ -1,6 +1,7 @@
 package server;
 
 import spark.*;
+import websocket.WebSocketHandler;
 
 import java.nio.file.Paths;
 
@@ -15,6 +16,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", new WebSocketHandler());
 
         Spark.post("/user", ServerHelper::register);
         Spark.post("/session", ServerHelper::login);

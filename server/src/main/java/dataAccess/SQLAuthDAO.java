@@ -62,13 +62,16 @@ public class SQLAuthDAO implements AuthDAO {
                     if (rs.next()) {
                         return rs.getString("username");
                     }
+                    else {
+                        throw new Exception();
+                    }
                 }
             }
         }
         catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
-        return null;
+        //return null; FIXME - don't think I need this because I make it throw exception if there is no username
     }
 
     private final String[] createStatements = {

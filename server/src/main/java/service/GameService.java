@@ -42,7 +42,7 @@ public class GameService {
         if (!gameDAO.checkGameID(joinGameRequest.gameID())) {
             throw new BadRequestException();
         }
-        gameDAO.joinGame(joinGameRequest, username);
+        gameDAO.joinGame(joinGameRequest, username, false);
     }
 
 }

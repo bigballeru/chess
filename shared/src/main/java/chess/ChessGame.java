@@ -13,8 +13,15 @@ public class ChessGame {
 
     private ChessBoard myBoard;
     private TeamColor myTurn;
+    private boolean gameOver;
     public ChessGame() {
+        gameOver = false;
+        myBoard = new ChessBoard();
+        myBoard.resetBoard();
+    }
 
+    public void setGameOver() {
+        this.gameOver = true;
     }
 
     /**
