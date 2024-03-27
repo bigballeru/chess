@@ -12,13 +12,13 @@ import java.util.HashSet;
 public class ChessGame {
 
     private ChessBoard myBoard;
-    private TeamColor myTurn;
+    private TeamColor teamTurn;
     private boolean gameOver;
     public ChessGame() {
         gameOver = false;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
-        myTurn = TeamColor.WHITE;
+        teamTurn = TeamColor.WHITE;
     }
 
     public void setGameOver() {
@@ -29,7 +29,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        return this.myTurn;
+        return this.teamTurn;
     }
 
     /**
@@ -38,7 +38,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        this.myTurn = team;
+        this.teamTurn = team;
     }
 
     public boolean yourTurn(ChessMove move) {
@@ -126,7 +126,9 @@ public class ChessGame {
                     myBoard.addPiece(move.getEndPosition(), myPiece);
                 }
                 // Changes the turn to the next team
-                // setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+                this.isInStalemate(this.teamTurn);
+                this.isInCheckmate(this.teamTurn);
+                setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
             }
             else {
                 throw new InvalidMoveException();
@@ -232,6 +234,7 @@ public class ChessGame {
             }
         }
 
+        this.setGameOver();
         return true;
 
     }
@@ -266,7 +269,12 @@ public class ChessGame {
             return true;
         }
 
+        this.setGameOver();
         return false;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
     }
 
     /**

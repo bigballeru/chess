@@ -112,12 +112,15 @@ public class WebSocketHandler {
             ArrayList<GameData> games = gameService.listGames();
             for (GameData g : games) {
                 if (g.gameID() == gameID) {
+                    if (g.game().isGameOver() == true) {
+                        throw new Exception("Game over - can't move");
+                    }
                     SQLGameDAO sqlGameDAO = new SQLGameDAO();
                     if (Objects.equals(g.blackUsername(), username)) {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.BLACK) {
                             g.game().makeMove(chessMove);
                             sqlGameDAO.updateGame(gameID, g.game());
-                            g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
+                            // g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
                         }
                         else {
                             throw new Exception("Wrong color - white's turn");
@@ -127,7 +130,7 @@ public class WebSocketHandler {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
                             g.game().makeMove(chessMove);
                             sqlGameDAO.updateGame(gameID, g.game());
-                            g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
+                            // g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
                         }
                         else {
                             throw new Exception("Wrong color - black's turn");
@@ -160,6 +163,7 @@ public class WebSocketHandler {
             ArrayList<GameData> games = gameService.listGames();
             for (GameData g : games) {
                 if (g.gameID() == gameID) {
+                    mygame = g.game();
                     SQLGameDAO sqlGameDAO = new SQLGameDAO();
                     if (Objects.equals(g.whiteUsername(), username)) {
                         sqlGameDAO.joinGame(new JoinGameRequest("white", gameID), null, true);
@@ -170,7 +174,7 @@ public class WebSocketHandler {
                         webSocketSessions.removeSessionFromGame(gameID, authToken, session);
                     }
                     else {
-                        throw new Exception("You are not a player");
+                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
                     }
                 }
             }
@@ -194,12 +198,20 @@ public class WebSocketHandler {
             ArrayList<GameData> games = gameService.listGames();
             for (GameData g : games) {
                 if (g.gameID() == gameID) {
+                    if (g.game().isGameOver()) {
+                        throw new Exception("Game is already over - you can't resign");
+                    }
+                    mygame = g.game();
                     SQLGameDAO sqlGameDAO = new SQLGameDAO();
                     if (Objects.equals(g.whiteUsername(), username)) {
-                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+//                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                        g.game().setGameOver();
+                        sqlGameDAO.updateGame(gameID, g.game());
                     }
                     else if (Objects.equals(g.blackUsername(), username)) {
-                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+//                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
+                        g.game().setGameOver();
+                        sqlGameDAO.updateGame(gameID, g.game());
                     }
                     else {
                         throw new Exception("You are not a player");
@@ -210,7 +222,8 @@ public class WebSocketHandler {
                 throw new Exception("Game does not exist");
             }
             String message = username + " has resigned the game";
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), null);
+            webSocketSessions.removeSessionFromGame(gameID, authToken, session); // Remove session from game after broadcasting message
         } catch (Exception e) {
             this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
