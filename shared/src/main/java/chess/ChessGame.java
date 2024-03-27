@@ -18,6 +18,7 @@ public class ChessGame {
         gameOver = false;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
+        myTurn = TeamColor.WHITE;
     }
 
     public void setGameOver() {
@@ -125,7 +126,7 @@ public class ChessGame {
                     myBoard.addPiece(move.getEndPosition(), myPiece);
                 }
                 // Changes the turn to the next team
-                setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+                // setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
             }
             else {
                 throw new InvalidMoveException();

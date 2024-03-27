@@ -18,7 +18,7 @@ public class UserGameCommand {
     private final String authToken;
     private Integer gameID;
     private ChessGame.TeamColor playerColor;
-    private ChessMove chessMove;
+    private ChessMove move;
 
     public UserGameCommand(String authToken) {
         this.authToken = authToken;
@@ -34,7 +34,7 @@ public class UserGameCommand {
     public UserGameCommand(String authToken, Integer gameID, ChessMove chessMove) {
         this.authToken = authToken;
         this.gameID = gameID;
-        this.chessMove = chessMove;
+        this.move = chessMove;
         commandType = CommandType.MAKE_MOVE;
     }
 
@@ -52,8 +52,8 @@ public class UserGameCommand {
         RESIGN
     }
 
-    public ChessMove getChessMove() {
-        return chessMove;
+    public ChessMove getMove() {
+        return move;
     }
 
     public String getAuthString() {

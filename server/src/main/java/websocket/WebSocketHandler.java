@@ -6,6 +6,7 @@ import dataAccess.SQLGameDAO;
 import model.GameData;
 import model.requestresults.JoinGameRequest;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.GameService;
@@ -17,11 +18,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
 
     private final WebSocketSessions webSocketSessions = new WebSocketSessions();
+
+    @OnWebSocketError
+    public void findError(Throwable throwable) {
+        throwable.printStackTrace();
+    }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -29,7 +36,7 @@ public class WebSocketHandler {
         switch (userGameCommand.getCommandType()) {
             case JOIN_PLAYER -> joinPlayer(userGameCommand.getGameID(), userGameCommand.getAuthString(), userGameCommand.getPlayerColor(), session);
             case JOIN_OBSERVER -> joinObserver(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
-            case MAKE_MOVE -> makeMove(userGameCommand.getGameID(), userGameCommand.getAuthString(), userGameCommand.getChessMove(), session);
+            case MAKE_MOVE -> makeMove(userGameCommand.getGameID(), userGameCommand.getAuthString(), userGameCommand.getMove(), session);
             case LEAVE -> leave(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
             case RESIGN -> resign(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
         }
@@ -58,12 +65,15 @@ public class WebSocketHandler {
                     }
                 }
             }
+            if (mygame == null) {
+                throw new Exception("there is no game with that ID");
+            }
             webSocketSessions.addSessionToGame(gameID, authToken, session);
             this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), session);
             String message = username + " joined the game as color " + teamColor.toString();
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
         } catch (Exception e) {
-            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
     }
 
@@ -86,9 +96,9 @@ public class WebSocketHandler {
             webSocketSessions.addSessionToGame(gameID, authToken, session);
             this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), session);
             String message = username + " joined the game as an observer.";
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
         } catch (Exception e) {
-            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
     }
 
@@ -106,8 +116,8 @@ public class WebSocketHandler {
                     if (Objects.equals(g.blackUsername(), username)) {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.BLACK) {
                             g.game().makeMove(chessMove);
-                            g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
                             sqlGameDAO.updateGame(gameID, g.game());
+                            g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
                         }
                         else {
                             throw new Exception("Wrong color - white's turn");
@@ -116,8 +126,8 @@ public class WebSocketHandler {
                     else if (Objects.equals(g.whiteUsername(), username)) {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
                             g.game().makeMove(chessMove);
-                            g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
                             sqlGameDAO.updateGame(gameID, g.game());
+                            g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
                         }
                         else {
                             throw new Exception("Wrong color - black's turn");
@@ -135,9 +145,9 @@ public class WebSocketHandler {
             }
             this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), null);
             String message = username + " made the move //FIXME";
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
         } catch (Exception e) {
-            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
     }
 
@@ -168,9 +178,9 @@ public class WebSocketHandler {
                 throw new Exception("Game does not exist");
             }
             String message = username + " has left the game";
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
         } catch (Exception e) {
-            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
     }
 
@@ -200,9 +210,9 @@ public class WebSocketHandler {
                 throw new Exception("Game does not exist");
             }
             String message = username + " has resigned the game";
-            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message), authToken);
+            this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
         } catch (Exception e) {
-            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage()), session);
+            this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
         }
     }
 
@@ -211,7 +221,8 @@ public class WebSocketHandler {
     }
 
     public void broadcastMessage(Integer gameID, ServerMessage message, String exceptThisAuthToken) throws IOException {
-        HashMap<String, Session> connections = webSocketSessions.getSessionsForGame(gameID);
+        ConcurrentHashMap<String, Session> connections = webSocketSessions.getSessionsForGame(gameID);
+        ArrayList<Session> toRemove = new ArrayList<>();
 
         for (HashMap.Entry<String, Session> entry : connections.entrySet()) {
             if (entry.getValue().isOpen()) {
@@ -220,8 +231,12 @@ public class WebSocketHandler {
                 }
             }
             else {
-                webSocketSessions.removeSessionFromGame(gameID, entry.getKey(), entry.getValue());
+                toRemove.add(entry.getValue());
             }
+        }
+
+        for (Session s : toRemove) {
+            webSocketSessions.removeSession(s);
         }
     }
 }
