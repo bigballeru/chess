@@ -1,5 +1,6 @@
 package repls;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.UserData;
 import model.requestresults.*;
@@ -14,7 +15,6 @@ import static ui.EscapeSequences.*;
 
 public class PostLoginUI {
 
-    private DrawChessboard drawChessboard = new DrawChessboard();
     private AuthData authData = null;
     private String url = "http://localhost:8080";
     private State state = State.SIGNEDIN;
@@ -98,8 +98,9 @@ public class PostLoginUI {
             Integer gameID = Integer.parseInt(params[0]);
 
             serverFacade.joinGame(new JoinGameRequest(null,gameID), authData);
-            drawChessboard.run();
-            return String.format(" You are now watching game %s", params[0]);
+            InGameUI inGameUI = new InGameUI();
+            inGameUI.run(authData, gameID, null, false);
+            return String.format(" You successfully started watching and left watching game %s", params[0]);
         }
         if (params.length == 2) {
             ServerFacade serverFacade = new ServerFacade(url);
@@ -107,8 +108,14 @@ public class PostLoginUI {
             String color = params[1];
 
             serverFacade.joinGame(new JoinGameRequest(color, gameID), authData);
-            drawChessboard.run();
-            return String.format(" You successfully joined game %s", params[0]);
+            InGameUI inGameUI = new InGameUI();
+            if (color.toLowerCase().equals("black")) {
+                inGameUI.run(authData, gameID, ChessGame.TeamColor.BLACK, true);
+            }
+            else {
+                inGameUI.run(authData, gameID, ChessGame.TeamColor.WHITE, true);
+            }
+            return String.format(" You successfully joined game and exited %s", params[0]);
         }
         throw new ResponseException(400, " Need <ID> [WHITE]");
     }

@@ -266,10 +266,10 @@ public class ChessGame {
         }
 
         if (realPossibleMoves.isEmpty()) {
+            this.setGameOver();
             return true;
         }
 
-        this.setGameOver();
         return false;
     }
 

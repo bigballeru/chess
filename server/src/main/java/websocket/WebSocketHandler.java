@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataAccess.SQLGameDAO;
 import model.GameData;
@@ -105,6 +106,10 @@ public class WebSocketHandler {
     //FIXME - need to add functionality for when in check/checkmate
     public void makeMove(Integer gameID, String authToken, ChessMove chessMove, Session session) throws IOException {
         try {
+            String opponentName = "";
+            boolean inCheck = false;
+            boolean inCheckMate = false;
+            boolean inStaleMate = false;
             ChessGame mygame = null;
             UserService userService = new UserService();
             String username = userService.getUsername(authToken);
@@ -119,8 +124,11 @@ public class WebSocketHandler {
                     if (Objects.equals(g.blackUsername(), username)) {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.BLACK) {
                             g.game().makeMove(chessMove);
+                            opponentName = g.whiteUsername();
+                            if (g.game().isInCheckmate(ChessGame.TeamColor.WHITE)) inCheckMate = true;
+                            else if (g.game().isInStalemate(ChessGame.TeamColor.WHITE)) inStaleMate = true;
+                            else if (g.game().isInCheck(ChessGame.TeamColor.WHITE)) inCheck = true;
                             sqlGameDAO.updateGame(gameID, g.game());
-                            // g.game().setTeamTurn(ChessGame.TeamColor.WHITE);
                         }
                         else {
                             throw new Exception("Wrong color - white's turn");
@@ -129,8 +137,11 @@ public class WebSocketHandler {
                     else if (Objects.equals(g.whiteUsername(), username)) {
                         if (g.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
                             g.game().makeMove(chessMove);
+                            opponentName = g.blackUsername();
+                            if (g.game().isInCheckmate(ChessGame.TeamColor.BLACK)) inCheckMate = true;
+                            else if (g.game().isInStalemate(ChessGame.TeamColor.BLACK)) inStaleMate = true;
+                            else if (g.game().isInCheck(ChessGame.TeamColor.BLACK)) inCheck = true;
                             sqlGameDAO.updateGame(gameID, g.game());
-                            // g.game().setTeamTurn(ChessGame.TeamColor.BLACK);
                         }
                         else {
                             throw new Exception("Wrong color - black's turn");
@@ -146,11 +157,35 @@ public class WebSocketHandler {
             if (mygame == null) {
                 throw new Exception("Game does not exist");
             }
+            if (inCheckMate) this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, opponentName + " is in Checkmate", false), null);
+            if (inStaleMate) this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, opponentName + " is in Stalemate", false), null);
+            if (inCheck) this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, opponentName + " is in Check", false), null);
             this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, mygame), null);
-            String message = username + " made the move //FIXME";
+            String message = username + " made the move " + chessPositionsToString(chessMove.getStartPosition(), chessMove.getEndPosition());
             this.broadcastMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, false), authToken);
+
         } catch (Exception e) {
             this.sendMessage(gameID, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage(), true), session);
+        }
+    }
+
+    private String chessPositionsToString(ChessPosition position1, ChessPosition position2) {
+        char col1Letter = columnToLetter(9 - position1.getColumn());
+        char col2Letter = columnToLetter(9 - position2.getColumn());
+
+        int row1Numeric = position1.getRow();
+        int row2Numeric = position2.getRow();
+
+        // Building the string with the positions
+        return "" + col1Letter + row1Numeric + col2Letter + row2Numeric;
+    }
+
+    private char columnToLetter(int col) {
+        char[] columnLetters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        if (col >= 1 && col <= 8) {
+            return columnLetters[col - 1];
+        } else {
+            throw new IllegalArgumentException("Column index out of bounds");
         }
     }
 
@@ -188,7 +223,6 @@ public class WebSocketHandler {
         }
     }
 
-    //FIXME - add stuff to end gameplay and udpate that in server
     public void resign(Integer gameID, String authToken, Session session) throws IOException {
         try {
             ChessGame mygame = null;
@@ -204,12 +238,10 @@ public class WebSocketHandler {
                     mygame = g.game();
                     SQLGameDAO sqlGameDAO = new SQLGameDAO();
                     if (Objects.equals(g.whiteUsername(), username)) {
-//                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
                         g.game().setGameOver();
                         sqlGameDAO.updateGame(gameID, g.game());
                     }
                     else if (Objects.equals(g.blackUsername(), username)) {
-//                        webSocketSessions.removeSessionFromGame(gameID, authToken, session);
                         g.game().setGameOver();
                         sqlGameDAO.updateGame(gameID, g.game());
                     }

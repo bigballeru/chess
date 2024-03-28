@@ -1,12 +1,10 @@
 package repls;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import model.AuthData;
 import serverFacade.ResponseException;
-import ui.DrawChessboard;
 import webSocket.GameHandler;
 import webSocket.WebSocketFacade;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -18,6 +16,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.DrawChessboard.drawBoard;
+import static ui.DrawChessboard.drawBoardWithMoves;
 import static ui.EscapeSequences.*;
 
 public class InGameUI implements GameHandler {
@@ -26,81 +25,105 @@ public class InGameUI implements GameHandler {
     Integer gameID = null;
     private WebSocketFacade ws = null;
     ChessGame.TeamColor playerColor = null;
-    ChessBoard chessBoard = null;
+    ChessGame chessGame = null;
+    boolean leave = false;
 
     public InGameUI() {
         this.ws = new WebSocketFacade(this);
     }
 
-    public void run(AuthData authData, Integer gameID, ChessGame.TeamColor playerColor, String username) {
+    public void run(AuthData authData, Integer gameID, ChessGame.TeamColor playerColor, boolean isPlayer) throws ResponseException {
         this.authData = authData;
         this.gameID = gameID;
         this.playerColor = playerColor;
 
+        if (isPlayer) {
+            this.joinPlayer();
+        }
+        else {
+            this.joinObserver();
+        }
+
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("  leave")) {
-            printPrompt();
+        boolean firstTime = true;
+        while (!leave) {
+            if (firstTime) {
+                printPrompt();
+                firstTime = false;
+            }
             String line = scanner.nextLine();
 
             try {
-                result = this.eval(line);
-                System.out.println(SET_TEXT_COLOR_BLUE + result);
+                this.eval(line);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
+            printPrompt();
         }
 
         System.out.println();
-
-        if (result.equals("  leave")) {
-            //FIXME - adjust to just exit this
-        }
     }
 
-    public String eval(String input) {
+    public void eval(String input) {
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "redraw" -> redraw();
-                case "move" -> move(params);
-                case "leave" -> leave();
-                case "resign" -> resign();
-                case "highlight" -> highlight(params);
-                default -> help();
-            };
-        } catch (ResponseException ex) {
-            return ex.getMessage();
+            if (Objects.equals(cmd, "redraw")) redraw();
+            else if (Objects.equals(cmd, "move")) move(params);
+            else if (Objects.equals(cmd, "leave")) leave();
+            else if (Objects.equals(cmd, "resign")) resign();
+            else if (Objects.equals(cmd, "highlight")) highlight(params);
+            else help();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    public String highlight(String... params) {
-        ChessGame chessGame = new ChessGame();
-
-
-        return "";
-        //FIXME
+    public void joinPlayer() throws ResponseException {
+        ws.joinPlayer(gameID, authData.authToken(), playerColor);
     }
 
-    public String redraw() {
-        drawBoard(new PrintStream(System.out, true, StandardCharsets.UTF_8), chessBoard, playerColor);
-        return "";
+    public void joinObserver() throws ResponseException {
+        ws.joinObserver(gameID, authData.authToken());
     }
 
-    public String move(String... params) throws ResponseException {
+    public void highlight(String... params) throws ResponseException {
+        if (params.length == 1 && params[0].length() == 2) {
+            int col = letterToColumn(params[0].charAt(0));
+            int row = Character.getNumericValue(params[0].charAt(1));
+
+            if ((row > 8 || row < 1) || ((col > 8) || (col < 1))) {
+                throw new ResponseException(400, "  That is not a real position");
+            }
+            if (this.chessGame.getBoard().getPiece(new ChessPosition(row, 9 - col)) == null) {
+                throw new ResponseException(400, " No piece there");
+            }
+            drawBoardWithMoves(new PrintStream(System.out, true, StandardCharsets.UTF_8), this.chessGame.getBoard(), playerColor, chessGame.validMoves(new ChessPosition(row, col)), new ChessPosition(row, col));
+        }
+        else {
+            throw new ResponseException(400, "  Just need one position");
+        }
+        System.out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
+    }
+
+    public void redraw() {
+        drawBoard(new PrintStream(System.out, true, StandardCharsets.UTF_8), this.chessGame.getBoard(), playerColor);
+        System.out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
+    }
+
+    public void move(String... params) throws ResponseException {
         if (params.length == 1) {
             if (params[0].length() == 4) {
-                int row1 = letterToColumn(params[0].charAt(0));
-                int col1 = (int) params[0].charAt(1);
-                int row2 = letterToColumn(params[0].charAt(2));
-                int col2 = (int) params[0].charAt(3);
+                int col1 = letterToColumn(params[0].charAt(0));
+                int row1 = Character.getNumericValue(params[0].charAt(1));
+                int col2 = letterToColumn(params[0].charAt(2));
+                int row2 = Character.getNumericValue(params[0].charAt(3));
 
-                ChessMove chessMove = new ChessMove(new ChessPosition(row1, col1), new ChessPosition(row2, col2), null);
+                ChessMove chessMove = new ChessMove(new ChessPosition(row1, 9 - col1), new ChessPosition(row2, 9 - col2), null);
                 ws.makeMove(chessMove, gameID, authData.authToken());
-                return "";
             }
             else {
                 throw new ResponseException(500, "  Incorrect number of letters");
@@ -111,23 +134,24 @@ public class InGameUI implements GameHandler {
         }
     }
 
-    public String leave() throws ResponseException {
+    public void leave() throws ResponseException {
         ws.leave(gameID, authData.authToken());
-        return "";
+        leave = true;
     }
 
-    public String resign() throws ResponseException {
+    public void resign() throws ResponseException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Are you sure you want to resign? (yes/no)");
         String response = scanner.nextLine();
 
         if ("yes".equalsIgnoreCase(response)) {
             ws.resign(gameID, authData.authToken());
-            return "You have resigned from the game.";
+            System.out.println("You have resigned from the game.");
         } else {
-            return "Resignation canceled.";
+            System.out.println("Resignation canceled.");
         }
     }
+    // TODO - probably need to fix to not leave game on server side
 
     public int letterToColumn(char letter) {
         switch (Character.toLowerCase(letter)) { // Convert to lowercase to make it case-insensitive
@@ -160,20 +184,28 @@ public class InGameUI implements GameHandler {
             System.out.println(serverMessage.getErrorMessage());
         }
         if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            ChessGame game = serverMessage.getGame();
-            drawBoard(new PrintStream(System.out, true, StandardCharsets.UTF_8), game.getBoard(), playerColor);
+            this.chessGame = serverMessage.getGame();
+            if (playerColor != null) {
+                drawBoard(new PrintStream(System.out, true, StandardCharsets.UTF_8), this.chessGame.getBoard(), playerColor);
+
+            }
+            else {
+                drawBoard(new PrintStream(System.out, true, StandardCharsets.UTF_8), this.chessGame.getBoard(), ChessGame.TeamColor.WHITE);
+            }
+            System.out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
         }
     }
 
-    public String help() {
-        return """
+    public void help() {
+        System.out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
+        System.out.print("""
                  redraw - will redraw the game board for you
                  move <MOVE> - allows you to move a piece on your turn
                  leave - you leave the game, but it remains a live game
                  resign - you lose the game, but you don't leave it
                  highlight <POSITION> - shows you all possible moves for the piece
                  help - to see all commands
-               """;
+               """);
     }
 
     private void printPrompt() {
@@ -183,10 +215,5 @@ public class InGameUI implements GameHandler {
     @Override
     public void onGameUpdate(ServerMessage serverMessage) {
         notify(serverMessage);
-    }
-
-    @Override
-    public void onPrintMessage(String message) {
-        System.out.println(message);
     }
 }
