@@ -1,13 +1,12 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static ui.EscapeSequences.*;
@@ -18,28 +17,44 @@ public class DrawChessboard {
     private static final String BORDER_SQUARES = SET_BG_COLOR_LIGHT_GREY + "   ";
     private static final String WHITE_SQUARE = SET_BG_COLOR_WHITE + "   ";
     private static final String BLACK_SQUARE = SET_BG_COLOR_BLACK + "   ";
+    private static final String YELLOW_SQUARE = SET_BG_COLOR_YELLOW + "   ";
     private static final List<String> LETTER_COORDINATES = Arrays.asList(" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ");
 
     public static void run () {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
-        ChessBoard chessBoard = new ChessBoard();
-        chessBoard.resetBoard();
+        ChessGame chessGame = new ChessGame();
 
-        drawBoard(out, chessBoard);
+        drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.BLACK);
+        drawBoardWithMoves(out, chessGame.getBoard(), ChessGame.TeamColor.BLACK, chessGame.validMoves(new ChessPosition(1,2)), new ChessPosition(1,2));
+        drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE);
+        drawBoardWithMoves(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE, chessGame.validMoves(new ChessPosition(1,2)), new ChessPosition(1,2));
     }
 
-    private static void drawBoard(PrintStream out, ChessBoard chessBoard) {
-        drawTopBottomLevel(out, false);
-        drawChessBoard(out, chessBoard, false);
-        drawTopBottomLevel(out, false);
+    public static void drawBoard(PrintStream out, ChessBoard chessBoard, ChessGame.TeamColor playerColor) {
+        if (playerColor == ChessGame.TeamColor.WHITE) {
+            drawTopBottomLevel(out, true);
+            drawChessBoard(out, chessBoard, false, null, null);
+            drawTopBottomLevel(out, true);
+        }
+        else if (playerColor == ChessGame.TeamColor.BLACK) {
+            drawTopBottomLevel(out, false);
+            drawChessBoard(out, chessBoard, true, null, null);
+            drawTopBottomLevel(out, false);
+        }
+    }
 
-        drawBlankLine(out);
-
-        drawTopBottomLevel(out, true);
-        drawChessBoard(out, chessBoard, true);
-        drawTopBottomLevel(out, true);
-
+    public static void drawBoardWithMoves(PrintStream out, ChessBoard chessBoard, ChessGame.TeamColor playerColor, Collection<ChessMove> chessMoves, ChessPosition initialPosition) {
+        if (playerColor == ChessGame.TeamColor.WHITE) {
+            drawTopBottomLevel(out, true);
+            drawChessBoard(out, chessBoard, false, chessMoves, initialPosition);
+            drawTopBottomLevel(out, true);
+        }
+        else if (playerColor == ChessGame.TeamColor.BLACK) {
+            drawTopBottomLevel(out, false);
+            drawChessBoard(out, chessBoard, true, chessMoves, initialPosition);
+            drawTopBottomLevel(out, false);
+        }
     }
 
     private static void drawBlankLine(PrintStream out) {
@@ -67,49 +82,124 @@ public class DrawChessboard {
         out.println();
     }
 
-    private static void drawChessBoard(PrintStream out, ChessBoard chessBoard, boolean second) {
-        if (second) {
-            for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
-                out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (BOARD_SIZE_IN_SQUARES - row) + " ");
+    private static void drawChessBoard(PrintStream out, ChessBoard chessBoard, boolean second, Collection<ChessMove> chessMoves, ChessPosition chessPosition) {
+        if (chessMoves == null && chessPosition == null) {
+            if (second) {
+                for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
+                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
 
-                for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
-                    boolean isBlackSquare = (row + col) % 2 == 0;
-                    if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
-                        if (isBlackSquare) {
-                            printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+                        boolean isBlackSquare = (row + col) % 2 == 0;
+                        if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                            if (isBlackSquare) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                            } else {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+                            }
                         } else {
-                            printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                            out.print(isBlackSquare ? WHITE_SQUARE : BLACK_SQUARE);
                         }
-                    } else {
-                        out.print(isBlackSquare ? BLACK_SQUARE : WHITE_SQUARE);
                     }
-                }
 
-                out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (BOARD_SIZE_IN_SQUARES - row) + " ");
-                out.print(FIX_BACKGROUND);
-                out.println();
+                    out.print(RESET_TEXT_BOLD_FAINT + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
+                    out.print(FIX_BACKGROUND);
+                    out.println();
+                }
+            } else {
+                for (int row = BOARD_SIZE_IN_SQUARES - 1; row > 0; --row) {
+                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
+
+                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+                        boolean isBlackSquare = (row + col) % 2 == 0;
+                        if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                            if (isBlackSquare) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                            } else {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+                            }
+                        } else {
+                            out.print(isBlackSquare ? WHITE_SQUARE : BLACK_SQUARE);
+                        }
+                    }
+
+                    out.print(RESET_TEXT_BOLD_FAINT + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
+                    out.print(FIX_BACKGROUND);
+                    out.println();
+                }
             }
         }
         else {
-            for (int row = BOARD_SIZE_IN_SQUARES - 1; row > 0; --row) {
-                out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (BOARD_SIZE_IN_SQUARES - row) + " ");
+            ChessPosition adjustedChessPosition = new ChessPosition(chessPosition.getRow(),BOARD_SIZE_IN_SQUARES - chessPosition.getColumn());
+            ArrayList<ChessPosition> finalPositions = new ArrayList<ChessPosition>();
+            for (ChessMove move : chessMoves) {
+                ChessPosition chessPosition1 = move.getEndPosition();
+                finalPositions.add(new ChessPosition(chessPosition1.getRow(), BOARD_SIZE_IN_SQUARES - chessPosition1.getColumn()));
+            }
+            if (second) {
+                for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
+                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
 
-                for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
-                    boolean isBlackSquare = (row + col) % 2 == 0;
-                    if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
-                        if (isBlackSquare) {
-                            printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
-                        } else {
-                            printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+                        boolean isBlackSquare = (row + col) % 2 == 0;
+                        if (new ChessPosition(row, col).equals(adjustedChessPosition)) {
+                            printPiece(out, chessBoard.getPiece(adjustedChessPosition), SET_BG_COLOR_GREEN + SET_TEXT_BOLD);
                         }
-                    } else {
-                        out.print(isBlackSquare ? BLACK_SQUARE : WHITE_SQUARE);
+                        else if (finalPositions.contains(new ChessPosition(row, col))) {
+                            if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_YELLOW + SET_TEXT_BOLD);
+                            }
+                            else {
+                                out.print(YELLOW_SQUARE);
+                            }
+                        }
+                        else if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                            if (isBlackSquare) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                            } else {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+                            }
+                        }
+                        else {
+                            out.print(isBlackSquare ? WHITE_SQUARE : BLACK_SQUARE);
+                        }
                     }
-                }
 
-                out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (BOARD_SIZE_IN_SQUARES - row) + " ");
-                out.print(FIX_BACKGROUND);
-                out.println();
+                    out.print(RESET_TEXT_BOLD_FAINT + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
+                    out.print(FIX_BACKGROUND);
+                    out.println();
+                }
+            } else {
+                for (int row = BOARD_SIZE_IN_SQUARES - 1; row > 0; --row) {
+                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
+
+                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+                        boolean isBlackSquare = (row + col) % 2 == 0;
+                        if (new ChessPosition(row, col).equals(adjustedChessPosition)) {
+                            printPiece(out, chessBoard.getPiece(adjustedChessPosition), SET_BG_COLOR_GREEN + SET_TEXT_BOLD);
+                        }
+                        else if (finalPositions.contains(new ChessPosition(row, col))) {
+                            if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_YELLOW + SET_TEXT_BOLD);
+                            }
+                            else {
+                                out.print(YELLOW_SQUARE);
+                            }
+                        }
+                        else if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
+                            if (isBlackSquare) {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
+                            } else {
+                                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+                            }
+                        } else {
+                            out.print(isBlackSquare ? WHITE_SQUARE : BLACK_SQUARE);
+                        }
+                    }
+
+                    out.print(RESET_TEXT_BOLD_FAINT + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
+                    out.print(FIX_BACKGROUND);
+                    out.println();
+                }
             }
         }
     }

@@ -41,6 +41,18 @@ public class ServerMessage {
         this.game = chessGame;
     }
 
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
     }
