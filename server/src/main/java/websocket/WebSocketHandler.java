@@ -103,7 +103,6 @@ public class WebSocketHandler {
         }
     }
 
-    //FIXME - need to add functionality for when in check/checkmate
     public void makeMove(Integer gameID, String authToken, ChessMove chessMove, Session session) throws IOException {
         try {
             String opponentName = "";

@@ -151,7 +151,6 @@ public class InGameUI implements GameHandler {
             System.out.println("Resignation canceled.");
         }
     }
-    // TODO - probably need to fix to not leave game on server side
 
     public int letterToColumn(char letter) {
         switch (Character.toLowerCase(letter)) { // Convert to lowercase to make it case-insensitive
