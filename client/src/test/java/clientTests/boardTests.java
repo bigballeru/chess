@@ -21,8 +21,8 @@ public class boardTests {
         // System.out.println(chessGame.getBoard().toString());
         var start1 = new ChessPosition(2,1);
         drawBoardWithMoves(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE, chessGame.validMoves(start1), start1);
-        var start = new ChessPosition(2,9 - 1);
-        var end = new ChessPosition(4,9 - 1);
+        var start = new ChessPosition(2,8);
+        var end = new ChessPosition(4,8);
         var move = new ChessMove(start, end, null);
         chessGame.makeMove(move);
         drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE);

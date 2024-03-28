@@ -169,8 +169,8 @@ public class WebSocketHandler {
     }
 
     private String chessPositionsToString(ChessPosition position1, ChessPosition position2) {
-        char col1Letter = columnToLetter(9 - position1.getColumn());
-        char col2Letter = columnToLetter(9 - position2.getColumn());
+        char col1Letter = columnToLetter(position1.getColumn());
+        char col2Letter = columnToLetter(position2.getColumn());
 
         int row1Numeric = position1.getRow();
         int row2Numeric = position2.getRow();

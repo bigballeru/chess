@@ -91,7 +91,10 @@ public class DrawChessboard {
                 for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
                     out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
 
-                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+//                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+//                        printNormal(out, chessBoard, row, col);
+//                    }
+                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
                         printNormal(out, chessBoard, row, col);
                     }
 
@@ -103,7 +106,10 @@ public class DrawChessboard {
                 for (int row = BOARD_SIZE_IN_SQUARES - 1; row > 0; --row) {
                     out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
 
-                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+//                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+//                        printNormal(out, chessBoard, row, col);
+//                    }
+                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
                         printNormal(out, chessBoard, row, col);
                     }
 
@@ -126,7 +132,10 @@ public class DrawChessboard {
                 for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
                     out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
 
-                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+//                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
+//                        printerHelperPossible(out, chessBoard, adjustedChessPosition, finalPositions, row, col);
+//                    }
+                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
                         printerHelperPossible(out, chessBoard, adjustedChessPosition, finalPositions, row, col);
                     }
 
@@ -138,7 +147,10 @@ public class DrawChessboard {
                 for (int row = BOARD_SIZE_IN_SQUARES - 1; row > 0; --row) {
                     out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
 
-                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+//                    for (int col = BOARD_SIZE_IN_SQUARES - 1; col > 0; --col) {
+//                        printerHelperPossible(out, chessBoard, adjustedChessPosition, finalPositions, row, col);
+//                    }
+                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
                         printerHelperPossible(out, chessBoard, adjustedChessPosition, finalPositions, row, col);
                     }
 

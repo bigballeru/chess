@@ -98,8 +98,8 @@ public class InGameUI implements GameHandler {
             if ((row > 8 || row < 1) || ((col > 8) || (col < 1))) {
                 throw new ResponseException(400, "  That is not a real position");
             }
-            if (this.chessGame.getBoard().getPiece(new ChessPosition(row, 9 - col)) == null) {
-                throw new ResponseException(400, " No piece there");
+            if (this.chessGame.getBoard().getPiece(new ChessPosition(row, col)) == null) {
+                throw new ResponseException(400, "  No piece there");
             }
             drawBoardWithMoves(new PrintStream(System.out, true, StandardCharsets.UTF_8), this.chessGame.getBoard(), playerColor, chessGame.validMoves(new ChessPosition(row, col)), new ChessPosition(row, col));
         }
@@ -122,7 +122,7 @@ public class InGameUI implements GameHandler {
                 int col2 = letterToColumn(params[0].charAt(2));
                 int row2 = Character.getNumericValue(params[0].charAt(3));
 
-                ChessMove chessMove = new ChessMove(new ChessPosition(row1, 9 - col1), new ChessPosition(row2, 9 - col2), null);
+                ChessMove chessMove = new ChessMove(new ChessPosition(row1, col1), new ChessPosition(row2, col2), null);
                 ws.makeMove(chessMove, gameID, authData.authToken());
             }
             else {
