@@ -54,7 +54,7 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public void joinGame(JoinGameRequest joinGameRequest, String username, Boolean masterRequest) throws AlreadyTakenException, DataAccessException, BadRequestException {
-        // TODO - fixed so that does nothing if game is null and throws BadRequestException if there is no game?
+        // fix so that does nothing if game is null and throws BadRequestException if there is no game?
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername FROM games WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
