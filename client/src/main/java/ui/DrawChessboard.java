@@ -89,7 +89,7 @@ public class DrawChessboard {
         if (chessMoves == null && chessPosition == null) {
             if (second) {
                 for (int row = 1; row < BOARD_SIZE_IN_SQUARES; ++row) {
-                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + (row) + " ");
+                    out.print(SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY + " " + row + " ");
 
 //                    for (int col = 1; col < BOARD_SIZE_IN_SQUARES; ++col) {
 //                        printNormal(out, chessBoard, row, col);
@@ -120,12 +120,12 @@ public class DrawChessboard {
             }
         }
         else {
-            ChessPosition adjustedChessPosition = new ChessPosition(chessPosition.getRow(),BOARD_SIZE_IN_SQUARES - chessPosition.getColumn());
+            ChessPosition adjustedChessPosition = new ChessPosition(chessPosition.getRow(), chessPosition.getColumn());
             ArrayList<ChessPosition> finalPositions = new ArrayList<ChessPosition>();
             if (chessMoves != null) {
                 for (ChessMove move : chessMoves) {
                     ChessPosition chessPosition1 = move.getEndPosition();
-                    finalPositions.add(new ChessPosition(chessPosition1.getRow(), BOARD_SIZE_IN_SQUARES - chessPosition1.getColumn()));
+                    finalPositions.add(new ChessPosition(chessPosition1.getRow(), chessPosition1.getColumn()));
                 }
             }
             if (second) {
@@ -188,13 +188,13 @@ public class DrawChessboard {
     private static void printPieces(PrintStream out, ChessBoard chessBoard, int row, int col, boolean isBlackSquare) {
         if (chessBoard.getPiece(new ChessPosition(row, col)) != null) {
             if (isBlackSquare) {
-                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
-            } else {
                 printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_BLACK + SET_TEXT_BOLD);
+            } else {
+                printPiece(out, chessBoard.getPiece(new ChessPosition(row, col)), SET_BG_COLOR_WHITE + SET_TEXT_BOLD);
             }
         }
         else {
-            out.print(isBlackSquare ? WHITE_SQUARE : BLACK_SQUARE);
+            out.print(isBlackSquare ? BLACK_SQUARE : WHITE_SQUARE);
         }
     }
 

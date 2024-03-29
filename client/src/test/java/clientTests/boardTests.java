@@ -18,13 +18,27 @@ public class boardTests {
     public void testBoard() throws InvalidMoveException {
         ChessGame chessGame = new ChessGame();
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        // System.out.println(chessGame.getBoard().toString());
+        System.out.println(chessGame.getBoard().toString());
         var start1 = new ChessPosition(2,1);
         drawBoardWithMoves(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE, chessGame.validMoves(start1), start1);
+        var start = new ChessPosition(2,1);
+        var end = new ChessPosition(4,1);
+        var move = new ChessMove(start, end, null);
+        chessGame.makeMove(move);
+        drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE);
+    }
+
+    @Test
+    public void testBoardBlack() throws InvalidMoveException {
+        ChessGame chessGame = new ChessGame();
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        System.out.println(chessGame.getBoard().toString());
+        var start1 = new ChessPosition(2,1);
+        drawBoardWithMoves(out, chessGame.getBoard(), ChessGame.TeamColor.BLACK, chessGame.validMoves(start1), start1);
         var start = new ChessPosition(2,8);
         var end = new ChessPosition(4,8);
         var move = new ChessMove(start, end, null);
         chessGame.makeMove(move);
-        drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.WHITE);
+        drawBoard(out, chessGame.getBoard(), ChessGame.TeamColor.BLACK);
     }
 }
