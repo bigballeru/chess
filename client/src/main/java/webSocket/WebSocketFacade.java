@@ -33,6 +33,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
         // Consider adding logic for when the session is opened
     }
 
+    @Override
     @OnMessage
     public void onMessage(String message) {
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
